@@ -12,9 +12,8 @@ def get_app(asgi, cors=True, **kw):
     if asgi:
         from falcon.asgi import App as AsyncApp
         return AsyncApp(cors_enable=cors, **kw)
-    else:
-        from falcon import App
-        return App(cors_enable=cors, **kw)
+    from falcon import App
+    return App(cors_enable=cors, **kw)
 
 
 def make_app():

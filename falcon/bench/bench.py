@@ -237,8 +237,7 @@ def create_bench(name, env):
 
     if inspect.isgeneratorfunction(app):
         return bench_generator
-    else:
-        return bench
+    return bench
 
 
 def consolidate_datasets(datasets):
