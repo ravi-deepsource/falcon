@@ -5,7 +5,8 @@ import falcon.testing as testing
 
 class TestSlots:
 
-    def test_slots_request(self, asgi):
+    @staticmethod
+    def test_slots_request(asgi):
         req = testing.create_asgi_req() if asgi else testing.create_req()
 
         try:
@@ -13,7 +14,8 @@ class TestSlots:
         except AttributeError:
             pytest.fail('Unable to add additional variables dynamically')
 
-    def test_slots_response(self, asgi):
+    @staticmethod
+    def test_slots_response(asgi):
         if asgi:
             import falcon.asgi
             resp = falcon.asgi.Response()

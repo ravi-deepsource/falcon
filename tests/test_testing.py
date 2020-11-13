@@ -5,7 +5,8 @@ from falcon import App, status_codes, testing
 
 
 class CustomCookies:
-    def items(self):
+    @staticmethod
+    def items():
         return [('foo', 'bar'), ('baz', 'foo')]
 
 
@@ -61,7 +62,8 @@ def test_simulate_request_http_version(version, valid):
 
 def test_simulate_request_content_type():
     class Foo:
-        def on_post(self, req, resp):
+        @staticmethod
+        def on_post(req, resp):
             resp.body = req.content_type
 
     app = App()
@@ -110,7 +112,8 @@ def test_create_environ_cookies_options_method():
 
 def test_cookies_jar():
     class Foo:
-        def on_get(self, req, resp):
+        @staticmethod
+        def on_get(req, resp):
             # NOTE(myuz): In the future we shouldn't change the cookie
             #             a test depends on the input.
             # NOTE(kgriffs): This is the only test that uses a single
@@ -119,7 +122,8 @@ def test_cookies_jar():
             #   this use case.
             resp.set_cookie('has_permission', 'true')
 
-        def on_post(self, req, resp):
+        @staticmethod
+        def on_post(req, resp):
             if req.cookies['has_permission'] == 'true':
                 resp.status = falcon.HTTP_200
             else:
