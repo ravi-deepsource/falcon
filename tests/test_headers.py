@@ -34,7 +34,8 @@ class HeaderHelpersResource:
         else:
             self.last_modified = datetime.utcnow()
 
-    def _overwrite_headers(self, req, resp):
+    @staticmethod
+    def _overwrite_headers(req, resp):
         resp.content_type = 'x-falcon/peregrine'
         resp.cache_control = ['no-store']
 
@@ -125,19 +126,22 @@ class LocationHeaderUnicodeResource:
 
 class UnicodeHeaderResource:
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         resp.set_headers([
             ('X-auTH-toKEN', 'toomanysecrets'),
             ('Content-TYpE', 'application/json'),
             ('X-symBOl', '@'),
         ])
 
-    def on_post(self, req, resp):
+    @staticmethod
+    def on_post(req, resp):
         resp.set_headers([
             ('X-symb\u00F6l', 'thing'),
         ])
 
-    def on_put(self, req, resp):
+    @staticmethod
+    def on_put(req, resp):
         resp.set_headers([
             ('X-Thing', '\u00FF'),
         ])
@@ -170,17 +174,20 @@ class LinkHeaderResource:
 
 class AppendHeaderResource:
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         resp.append_header('X-Things', 'thing-1')
         resp.append_header('X-THINGS', 'thing-2')
         resp.append_header('x-thiNgs', 'thing-3')
 
-    def on_head(self, req, resp):
+    @staticmethod
+    def on_head(req, resp):
         resp.set_header('X-things', 'thing-1')
         resp.append_header('X-THINGS', 'thing-2')
         resp.append_header('x-thiNgs', 'thing-3')
 
-    def on_post(self, req, resp):
+    @staticmethod
+    def on_post(req, resp):
         resp.append_header('X-Things', 'thing-1')
 
         c1 = 'ut_existing_user=1; expires=Mon, 14-Jan-2019 21:20:08 GMT; Max-Age=600; path=/'
@@ -247,7 +254,8 @@ class ExpiresHeaderResource:
 
 
 class CustomHeaders:
-    def items(self):
+    @staticmethod
+    def items():
         return [('test-header', 'test-value')]
 
 
@@ -257,17 +265,20 @@ class CustomHeadersNotCallable:
 
 
 class CustomHeadersResource:
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         headers = CustomHeaders()
         resp.set_headers(headers)
 
-    def on_post(self, req, resp):
+    @staticmethod
+    def on_post(req, resp):
         resp.set_headers(CustomHeadersNotCallable())
 
 
 class TestHeaders:
 
-    def test_content_length(self, client):
+    @staticmethod
+    def test_content_length(client):
         resource = testing.SimpleTestResource(body=SAMPLE_BODY)
         client.app.add_route('/', resource)
         result = client.simulate_get()
@@ -275,24 +286,28 @@ class TestHeaders:
         content_length = str(len(SAMPLE_BODY))
         assert result.headers['Content-Length'] == content_length
 
-    def test_declared_content_length_on_head(self, client):
+    @staticmethod
+    def test_declared_content_length_on_head(client):
         client.app.add_route('/', ContentLengthHeaderResource(42))
         result = client.simulate_head()
         assert result.headers['Content-Length'] == '42'
 
-    def test_declared_content_length_overridden_by_no_body(self, client):
+    @staticmethod
+    def test_declared_content_length_overridden_by_no_body(client):
         client.app.add_route('/', ContentLengthHeaderResource(42))
         result = client.simulate_get()
         assert result.headers['Content-Length'] == '0'
 
-    def test_declared_content_length_overriden_by_body_length(self, client):
+    @staticmethod
+    def test_declared_content_length_overriden_by_body_length(client):
         resource = ContentLengthHeaderResource(42, body=SAMPLE_BODY)
         client.app.add_route('/', resource)
         result = client.simulate_get()
 
         assert result.headers['Content-Length'] == str(len(SAMPLE_BODY))
 
-    def test_declared_content_length_overriden_by_data_length(self, client):
+    @staticmethod
+    def test_declared_content_length_overriden_by_data_length(client):
         data = SAMPLE_BODY.encode()
 
         resource = ContentLengthHeaderResource(42, data=data)
@@ -301,14 +316,16 @@ class TestHeaders:
 
         assert result.headers['Content-Length'] == str(len(data))
 
-    def test_expires_header(self, client):
+    @staticmethod
+    def test_expires_header(client):
         expires = datetime(2013, 1, 1, 10, 30, 30)
         client.app.add_route('/', ExpiresHeaderResource(expires))
         result = client.simulate_get()
 
         assert result.headers['Expires'] == 'Tue, 01 Jan 2013 10:30:30 GMT'
 
-    def test_default_value(self, client):
+    @staticmethod
+    def test_default_value(client):
         resource = testing.SimpleTestResource(body=SAMPLE_BODY)
         client.app.add_route('/', resource)
         client.simulate_get()
@@ -321,14 +338,16 @@ class TestHeaders:
         assert value == 'some-value'
 
     @pytest.mark.parametrize('with_double_quotes', [True, False])
-    def test_unset_header(self, client, with_double_quotes):
+    @staticmethod
+    def test_unset_header(client, with_double_quotes):
         client.app.add_route('/', RemoveHeaderResource(with_double_quotes))
         result = client.simulate_get()
 
         assert 'Etag' not in result.headers
         assert 'Content-Disposition' not in result.headers
 
-    def test_required_header(self, client):
+    @staticmethod
+    def test_required_header(client):
         resource = testing.SimpleTestResource(body=SAMPLE_BODY)
         client.app.add_route('/', resource)
         client.simulate_get()
@@ -344,20 +363,23 @@ class TestHeaders:
             assert ex.description == expected_desc
 
     @pytest.mark.parametrize('status', (falcon.HTTP_204, falcon.HTTP_304))
-    def test_no_content_length(self, client, status):
+    @staticmethod
+    def test_no_content_length(client, status):
         client.app.add_route('/xxx', testing.SimpleTestResource(status=status))
 
         result = client.simulate_get('/xxx')
         assert 'Content-Length' not in result.headers
         assert not result.content
 
-    def test_content_header_missing(self, client):
+    @staticmethod
+    def test_content_header_missing(client):
         environ = testing.create_environ()
         req = falcon.Request(environ)
         for header in ('Content-Type', 'Content-Length'):
             assert req.get_header(header) is None
 
-    def test_passthrough_request_headers(self, client):
+    @staticmethod
+    def test_passthrough_request_headers(client):
         resource = testing.SimpleTestResource(body=SAMPLE_BODY)
         client.app.add_route('/', resource)
         request_headers = {
@@ -377,7 +399,8 @@ class TestHeaders:
             actual_value = resource.captured_req.get_header(name)
             assert actual_value == expected_value
 
-    def test_headers_as_list(self, client):
+    @staticmethod
+    def test_headers_as_list(client):
         headers = [
             ('Client-ID', '692ba466-74bb-11e3-bf3f-7567c531c7ca'),
             ('Accept', 'audio/*; q=0.2, audio/basic')
@@ -417,7 +440,8 @@ class TestHeaders:
         assert result.headers['Content-Type'] == content_type
 
     @pytest.mark.parametrize('asgi', [True, False])
-    def test_override_default_media_type_missing_encoding(self, asgi, client):
+    @staticmethod
+    def test_override_default_media_type_missing_encoding(asgi, client):
         body = '{"msg": "Hello Unicode! \U0001F638"}'
 
         client.app = create_app(asgi=asgi, media_type='application/json')
@@ -429,7 +453,8 @@ class TestHeaders:
         assert result.text == body
         assert result.json == {'msg': 'Hello Unicode! \U0001F638'}
 
-    def test_response_header_helpers_on_get(self, client):
+    @staticmethod
+    def test_response_header_helpers_on_get(client):
         last_modified = datetime(2013, 1, 1, 10, 30, 30)
         resource = HeaderHelpersResource(last_modified)
         client.app.add_route('/', resource)
@@ -521,7 +546,8 @@ class TestHeaders:
         assert resp.status_code == 200
         assert resp.headers['Content-Disposition'] == expected
 
-    def test_unicode_location_headers(self, client):
+    @staticmethod
+    def test_unicode_location_headers(client):
         client.app.add_route('/', LocationHeaderUnicodeResource())
 
         result = client.simulate_get()
@@ -533,7 +559,8 @@ class TestHeaders:
         assert result.headers['Content-Location'] == '/%C3%A7runchy/bacon'
         assert result.headers['Location'] == 'ab%C3%A7'
 
-    def test_unicode_headers_convertable(self, client):
+    @staticmethod
+    def test_unicode_headers_convertable(client):
         client.app.add_route('/', UnicodeHeaderResource())
 
         result = client.simulate_get('/')
@@ -542,7 +569,8 @@ class TestHeaders:
         assert result.headers['X-Auth-Token'] == 'toomanysecrets'
         assert result.headers['X-Symbol'] == '@'
 
-    def test_response_set_and_get_header(self, client):
+    @staticmethod
+    def test_response_set_and_get_header(client):
         resource = HeaderHelpersResource()
         client.app.add_route('/', resource)
 
@@ -577,7 +605,8 @@ class TestHeaders:
             # Ensure that deleted headers were not sent
             assert resource.resp.get_header('x-client-should-never-see-this') is None
 
-    def test_response_append_header(self, client):
+    @staticmethod
+    def test_response_append_header(client):
         client.app.add_route('/', AppendHeaderResource())
 
         for method in ('HEAD', 'GET'):
@@ -592,7 +621,8 @@ class TestHeaders:
 
     @pytest.mark.parametrize('header_name', ['Set-Cookie', 'set-cookie', 'seT-cookie'])
     @pytest.mark.parametrize('error_type', [ValueError, falcon.HeaderNotSupported])
-    def test_set_cookie_disallowed(self, client, header_name, error_type):
+    @staticmethod
+    def test_set_cookie_disallowed(client, header_name, error_type):
         resp = falcon.Response()
 
         cookie = 'ut_existing_user=1; expires=Mon, 14-Jan-2019 21:20:08 GMT; Max-Age=600; path=/'
@@ -609,7 +639,8 @@ class TestHeaders:
         with pytest.raises(error_type):
             resp.delete_header(header_name)
 
-    def test_vary_star(self, client):
+    @staticmethod
+    def test_vary_star(client):
         client.app.add_route('/', VaryHeaderResource(['*']))
         result = client.simulate_get()
         assert result.headers['vary'] == '*'
@@ -622,7 +653,8 @@ class TestHeaders:
         resource = VaryHeaderResource(vary)
         self._check_header(client, resource, 'Vary', expected_value)
 
-    def test_content_type_no_body(self, client):
+    @staticmethod
+    def test_content_type_no_body(client):
         client.app.add_route('/', testing.SimpleTestResource())
         result = client.simulate_get()
 
@@ -632,7 +664,8 @@ class TestHeaders:
         assert result.headers['Content-Length'] == '0'
 
     @pytest.mark.parametrize('status', (falcon.HTTP_204, falcon.HTTP_304))
-    def test_no_content_type(self, client, status):
+    @staticmethod
+    def test_no_content_type(client, status):
         client.app.add_route('/', testing.SimpleTestResource(status=status))
 
         result = client.simulate_get()
@@ -788,13 +821,15 @@ class TestHeaders:
         with pytest.raises(ValueError):
             resp.add_link('/related/resource', 'next', crossorigin=crossorigin)
 
-    def test_content_length_options(self, client):
+    @staticmethod
+    def test_content_length_options(client):
         result = client.simulate_options()
 
         content_length = str(len(falcon.HTTPNotFound().to_json()))
         assert result.headers['Content-Length'] == content_length
 
-    def test_set_headers_with_custom_class(self, client):
+    @staticmethod
+    def test_set_headers_with_custom_class(client):
         client.app.add_route('/', CustomHeadersResource())
 
         result = client.simulate_get('/')
@@ -802,14 +837,16 @@ class TestHeaders:
         assert 'test-header' in result.headers
         assert result.headers['test-header'] == 'test-value'
 
-    def test_headers_with_custom_class_not_callable(self, client):
+    @staticmethod
+    def test_headers_with_custom_class_not_callable(client):
         client.app.add_route('/', CustomHeadersResource())
 
         result = client.simulate_post('/')
 
         assert 'test-header' not in result.headers
 
-    def test_request_multiple_header(self, client):
+    @staticmethod
+    def test_request_multiple_header(client):
         resource = HeaderHelpersResource()
         client.app.add_route('/', resource)
 
@@ -833,7 +870,8 @@ class TestHeaders:
     def _check_link_header(self, client, resource, expected_value):
         self._check_header(client, resource, 'Link', expected_value)
 
-    def _check_header(self, client, resource, header, expected_value):
+    @staticmethod
+    def _check_header(client, resource, header, expected_value):
         client.app.add_route('/', resource)
 
         result = client.simulate_get()

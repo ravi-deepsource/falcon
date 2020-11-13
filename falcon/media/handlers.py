@@ -22,7 +22,8 @@ class Handlers(UserDict):
         # Also, this results in self.update(...) being called.
         UserDict.__init__(self, handlers)
 
-    def _resolve_media_type(self, media_type, all_media_types):
+    @staticmethod
+    def _resolve_media_type(media_type, all_media_types):
         resolved = None
 
         try:

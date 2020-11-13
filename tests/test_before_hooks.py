@@ -80,7 +80,8 @@ class Fish:
         assert resource
         params['fish'] = 'slippery'
 
-    def hook(self, req, resp, resource, params):
+    @staticmethod
+    def hook(req, resp, resource, params):
         assert resource
         params['fish'] = 'wet'
 
@@ -469,10 +470,12 @@ class PiggybackingCollection:
         resp.media = sorted(self._items.values(),
                             key=lambda item: item['itemid'])
 
-    def on_head_(self):
+    @staticmethod
+    def on_head_():
         return 'I shall not be decorated.'
 
-    def on_header(self):
+    @staticmethod
+    def on_header():
         return 'I shall not be decorated.'
 
     def on_post_collection(self, req, resp):

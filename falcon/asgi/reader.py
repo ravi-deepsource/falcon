@@ -313,23 +313,28 @@ class BufferedReader:
         """Whether the stream is at EOF."""
         return self._exhausted and self._buffer_len == self._buffer_pos
 
-    def fileno(self):
+    @staticmethod
+    def fileno():
         """Raise an instance of OSError since a file descriptor is not used."""
         raise OSError('This IO object does not use a file descriptor')
 
-    def isatty(self):
+    @staticmethod
+    def isatty():
         """Return ``False`` always."""
         return False
 
-    def readable(self):
+    @staticmethod
+    def readable():
         """Return ``True`` always."""
         return True
 
-    def seekable(self):
+    @staticmethod
+    def seekable():
         """Return ``False`` always."""
         return False
 
-    def writable(self):
+    @staticmethod
+    def writable():
         """Return ``False`` always."""
         return False
 

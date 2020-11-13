@@ -129,23 +129,28 @@ class BoundedStream:
     #   readlines(), __iter__(), __next__(), flush(), seek(),
     #   truncate(), __del__().
 
-    def fileno(self):
+    @staticmethod
+    def fileno():
         """Raise an instance of OSError since a file descriptor is not used."""
         raise OSError('This IO object does not use a file descriptor')
 
-    def isatty(self):
+    @staticmethod
+    def isatty():
         """Return ``False`` always."""
         return False
 
-    def readable(self):
+    @staticmethod
+    def readable():
         """Return ``True`` always."""
         return True
 
-    def seekable(self):
+    @staticmethod
+    def seekable():
         """Return ``False`` always."""
         return False
 
-    def writable(self):
+    @staticmethod
+    def writable():
         """Return ``False`` always."""
         return False
 

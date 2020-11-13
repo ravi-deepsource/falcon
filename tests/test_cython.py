@@ -14,10 +14,12 @@ except ImportError:
 class TestCythonized:
 
     @pytest.mark.skipif(not cython, reason='Cython not installed')
-    def test_imported_from_c_modules(self):
+    @staticmethod
+    def test_imported_from_c_modules():
         assert 'falcon/app.py' not in str(falcon.app)
 
-    def test_stream_has_private_read(self):
+    @staticmethod
+    def test_stream_has_private_read():
         stream = falcon.util.BufferedReader(io.BytesIO().read, 8)
 
         if cython and falcon.util.IS_64_BITS:

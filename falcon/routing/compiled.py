@@ -114,7 +114,8 @@ class CompiledRouter:
         self.find('/')
         return self._finder_src
 
-    def map_http_methods(self, resource, **kwargs):
+    @staticmethod
+    def map_http_methods(resource, **kwargs):
         """Map HTTP methods (e.g., GET, POST) to methods of a resource object.
 
         This method is called from :meth:`~.add_route` and may be overridden to
@@ -281,7 +282,8 @@ class CompiledRouter:
     # Private
     # -----------------------------------------------------------------
 
-    def _require_coroutine_responders(self, method_map):
+    @staticmethod
+    def _require_coroutine_responders(method_map):
         for method, responder in method_map.items():
             # NOTE(kgriffs): We don't simply wrap non-async functions
             #   since they likely peform relatively long blocking
@@ -304,7 +306,8 @@ class CompiledRouter:
                     msg = msg.format(responder)
                     raise TypeError(msg)
 
-    def _require_non_coroutine_responders(self, method_map):
+    @staticmethod
+    def _require_non_coroutine_responders(method_map):
         for method, responder in method_map.items():
             # NOTE(kgriffs): We don't simply wrap non-async functions
             #   since they likely peform relatively long blocking
@@ -570,7 +573,8 @@ class CompiledRouter:
 
         return scope['find']
 
-    def _instantiate_converter(self, klass, argstr=None):
+    @staticmethod
+    def _instantiate_converter(klass, argstr=None):
         if argstr is None:
             return klass()
 
@@ -774,7 +778,8 @@ class ConverterDict(UserDict):
         self._validate(name)
         UserDict.__setitem__(self, name, converter)
 
-    def _validate(self, name):
+    @staticmethod
+    def _validate(name):
         if not _IDENTIFIER_PATTERN.match(name):
             raise ValueError(
                 'Invalid converter name. Names may not be blank, and may '
@@ -957,28 +962,32 @@ class _CxSetFragmentFromPath:
 
 
 class _CxSetParamsFromPatternMatch:
-    def src(self, indentation):
+    @staticmethod
+    def src(indentation):
         return '{0}params.update(match.groupdict())'.format(
             _TAB_STR * indentation
         )
 
 
 class _CxSetParamsFromPatternMatchPrefetched:
-    def src(self, indentation):
+    @staticmethod
+    def src(indentation):
         return '{0}params.update(groups)'.format(
             _TAB_STR * indentation
         )
 
 
 class _CxPrefetchGroupsFromPatternMatch:
-    def src(self, indentation):
+    @staticmethod
+    def src(indentation):
         return '{0}groups = match.groupdict()'.format(
             _TAB_STR * indentation
         )
 
 
 class _CxReturnNone:
-    def src(self, indentation):
+    @staticmethod
+    def src(indentation):
         return '{0}return None'.format(_TAB_STR * indentation)
 
 

@@ -16,7 +16,8 @@ _MODULE = 'tests.test_cmd_inspect_app'
 
 class DummyResource:
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         resp.body = 'Test\n'
         resp.status = '200 OK'
 
@@ -80,7 +81,8 @@ class TestMakeParser:
         actual = parser.parse_args(args)
         assert actual == exp
 
-    def test_make_parser_error(self):
+    @staticmethod
+    def test_make_parser_error():
         parser = inspect_app.make_parser()
         with pytest.raises(SystemExit):
             parser.parse_args([])
@@ -88,7 +90,8 @@ class TestMakeParser:
 
 class TestLoadApp:
     @pytest.mark.parametrize('name', ('_APP', 'make_app'))
-    def test_load_app(self, name):
+    @staticmethod
+    def test_load_app(name):
         parser = inspect_app.make_parser()
         args = Namespace(app_module='{}:{}'.format(_MODULE, name), route_only=False, verbose=False)
         app = inspect_app.load_app(parser, args)
@@ -106,7 +109,8 @@ class TestLoadApp:
         with pytest.raises(SystemExit):
             inspect_app.load_app(parser, args)
 
-    def test_load_app_module_error(self):
+    @staticmethod
+    def test_load_app_module_error():
         parser = inspect_app.make_parser()
         args = Namespace(app_module='foo', route_only=False, verbose=False)
         with pytest.raises(SystemExit):
@@ -117,7 +121,8 @@ class TestLoadApp:
 @pytest.mark.parametrize('verbose', (True, False), ids=['verbose', 'not-verbose'])
 @pytest.mark.parametrize('internal', (True, False), ids=['internal', 'not-internal'])
 class TestMain:
-    def check(self, actual, expect):
+    @staticmethod
+    def check(actual, expect):
         if _WIN32:
             # windows randomly returns the driver name as lowercase
             assert actual.casefold() == expect.casefold()

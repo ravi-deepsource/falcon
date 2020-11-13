@@ -36,7 +36,8 @@ def test_urlencoded_form_handler_serialize(data, expected):
 
 class MediaMirror:
 
-    def on_post(self, req, resp):
+    @staticmethod
+    def on_post(req, resp):
         resp.media = req.media
 
 
