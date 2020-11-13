@@ -124,10 +124,6 @@ class WrappedRespondersResourceChild(WrappedRespondersResource):
     def on_get(self, req, resp):
         pass
 
-    def on_put(self, req, resp):
-        # Test passing no extra args
-        super(WrappedRespondersResourceChild, self).on_put(req, resp)
-
 
 class WrappedRespondersBodyParserResource:
 
@@ -207,10 +203,7 @@ class TestFieldResource:
 
 
 class TestFieldResourceChild(TestFieldResource):
-
-    def on_get(self, req, resp, id):
-        # Test passing a single extra arg
-        super(TestFieldResourceChild, self).on_get(req, resp, id)
+    pass
 
 
 class TestFieldResourceChildToo(TestFieldResource):
