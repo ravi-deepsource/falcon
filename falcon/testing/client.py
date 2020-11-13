@@ -1750,7 +1750,8 @@ class TestClient:
 
         # NOTE(kgriffs): We normally do not expect someone to try to nest
         #   contexts, so this is just a sanity-check.
-        assert not self._conductor
+        if self._conductor:
+            raise AssertionError
 
         self._conductor = ASGIConductor(self.app, headers=self._default_headers)
         await self._conductor.__aenter__()
