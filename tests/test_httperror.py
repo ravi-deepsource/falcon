@@ -83,8 +83,7 @@ class MiscErrorsResource:
     def on_get(self, req, resp):
         if self.needs_title:
             raise self._exception(title='Excuse Us', description='Something went boink!')
-        else:
-            raise self._exception(title='Something went boink!')
+        raise self._exception(title='Something went boink!')
 
 
 class UnauthorizedResource:
