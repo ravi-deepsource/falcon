@@ -101,12 +101,10 @@ def before(action, *args, is_async=False, **kwargs):
                     let()
 
             return resource
+        responder = responder_or_resource
+        do_before_one = _wrap_with_before(responder, action, args, kwargs, is_async)
 
-        else:
-            responder = responder_or_resource
-            do_before_one = _wrap_with_before(responder, action, args, kwargs, is_async)
-
-            return do_before_one
+        return do_before_one
 
     return _before
 
@@ -164,12 +162,10 @@ def after(action, *args, is_async=False, **kwargs):
                     let()
 
             return resource
+        responder = responder_or_resource
+        do_after_one = _wrap_with_after(responder, action, args, kwargs, is_async)
 
-        else:
-            responder = responder_or_resource
-            do_after_one = _wrap_with_after(responder, action, args, kwargs, is_async)
-
-            return do_after_one
+        return do_after_one
 
     return _after
 

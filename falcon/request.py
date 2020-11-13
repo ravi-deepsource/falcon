@@ -678,11 +678,10 @@ class Request:
 
             if first:
                 return (int(first), int(last or -1))
-            elif last:
+            if last:
                 return (-int(last), -1)
-            else:
-                msg = 'The range offsets are missing.'
-                raise errors.HTTPInvalidHeader(msg, 'Range')
+            msg = 'The range offsets are missing.'
+            raise errors.HTTPInvalidHeader(msg, 'Range')
 
         except ValueError:
             href = 'http://goo.gl/zZ6Ey'
@@ -700,9 +699,8 @@ class Request:
         if value and '=' in value:
             unit, sep, req_range = value.partition('=')
             return unit
-        else:
-            msg = "The value must be prefixed with a range unit, e.g. 'bytes='"
-            raise errors.HTTPInvalidHeader(msg, 'Range')
+        msg = "The value must be prefixed with a range unit, e.g. 'bytes='"
+        raise errors.HTTPInvalidHeader(msg, 'Range')
 
     @property
     def root_path(self):
@@ -1761,8 +1759,7 @@ class Request:
 
         if name in self._params:
             return True
-        else:
-            return False
+        return False
 
     def log_error(self, message):
         """Write an error message to the server's log.

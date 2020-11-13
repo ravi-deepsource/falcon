@@ -275,8 +275,7 @@ class CompiledRouter:
 
         if node is not None:
             return node.resource, node.method_map, params, node.uri_template
-        else:
-            return None
+        return None
 
     # -----------------------------------------------------------------
     # Private
@@ -750,8 +749,7 @@ class CompiledRouterNode:
                             _FIELD_PATTERN.sub('v', segment))
 
                 return False
-            else:
-                return other.is_var and not other.is_complex
+            return other.is_var and not other.is_complex
 
         # NOTE(kgriffs): If self is a static string match, then all the cases
         # for other are False, so no need to check.
