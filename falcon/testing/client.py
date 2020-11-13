@@ -184,10 +184,8 @@ class _ResultBase:
             if name.lower() == 'set-cookie':
                 cookies.load(value)
 
-        self._cookies = dict(
-            (morsel.key, Cookie(morsel))
-            for morsel in cookies.values()
-        )
+        self._cookies = {morsel.key: Cookie(morsel)
+            for morsel in cookies.values()}
 
         self._encoding = helpers.get_encoding_from_headers(self._headers)
 
