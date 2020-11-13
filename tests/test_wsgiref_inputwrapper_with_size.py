@@ -15,7 +15,8 @@ class TypeResource(testing.SimpleTestResource):
 
 
 class TestWsgiRefInputWrapper:
-    def test_resources_can_read_request_stream_during_tests(self):
+    @staticmethod
+    def test_resources_can_read_request_stream_during_tests():
         """Make sure we can perform a simple request during testing.
 
         Originally, testing would fail after performing a request because no

@@ -47,7 +47,8 @@ class TestFalconUtils:
         # below.
         self.uris = _arbitrary_uris(count=100, length=32)
 
-    def test_deprecated_decorator(self):
+    @staticmethod
+    def test_deprecated_decorator():
         msg = 'Please stop using this thing. It is going away.'
 
         @util.deprecated(msg)
@@ -60,7 +61,8 @@ class TestFalconUtils:
         warn = rec.pop()
         assert msg in str(warn.message)
 
-    def test_http_now(self):
+    @staticmethod
+    def test_http_now():
         expected = datetime.utcnow()
         actual = falcon.http_date_to_dt(falcon.http_now())
 
@@ -69,14 +71,16 @@ class TestFalconUtils:
 
         assert delta_sec <= 1
 
-    def test_dt_to_http(self):
+    @staticmethod
+    def test_dt_to_http():
         assert falcon.dt_to_http(datetime(2013, 4, 4)) == 'Thu, 04 Apr 2013 00:00:00 GMT'
 
         assert falcon.dt_to_http(
             datetime(2013, 4, 4, 10, 28, 54)
         ) == 'Thu, 04 Apr 2013 10:28:54 GMT'
 
-    def test_http_date_to_dt(self):
+    @staticmethod
+    def test_http_date_to_dt():
         assert falcon.http_date_to_dt('Thu, 04 Apr 2013 00:00:00 GMT') == datetime(2013, 4, 4)
 
         assert falcon.http_date_to_dt(
@@ -104,10 +108,12 @@ class TestFalconUtils:
             'Sunday, 06-Nov-94 08:49:37 GMT', obs_date=True
         ) == datetime(1994, 11, 6, 8, 49, 37)
 
-    def test_pack_query_params_none(self):
+    @staticmethod
+    def test_pack_query_params_none():
         assert falcon.to_query_str({}) == ''
 
-    def test_pack_query_params_one(self):
+    @staticmethod
+    def test_pack_query_params_one():
         assert falcon.to_query_str({'limit': 10}) == '?limit=10'
 
         assert falcon.to_query_str(
@@ -128,7 +134,8 @@ class TestFalconUtils:
 
         assert actual == expected
 
-    def test_pack_query_params_several(self):
+    @staticmethod
+    def test_pack_query_params_several():
         garbage_in = {
             'limit': 17,
             'echo': True,
@@ -154,7 +161,8 @@ class TestFalconUtils:
 
         assert expected == garbage_out
 
-    def test_uri_encode(self):
+    @staticmethod
+    def test_uri_encode():
         url = 'http://example.com/v1/fizbit/messages?limit=3&echo=true'
         assert uri.encode(url) == url
 
@@ -167,7 +175,8 @@ class TestFalconUtils:
                     '?limit=3&e%C3%A7ho=true')
         assert uri.encode(url) == expected
 
-    def test_uri_encode_double(self):
+    @staticmethod
+    def test_uri_encode_double():
         url = 'http://example.com/v1/fiz bit/messages'
         expected = 'http://example.com/v1/fiz%20bit/messages'
         assert uri.encode(uri.encode(url)) == expected
@@ -196,7 +205,8 @@ class TestFalconUtils:
                 encoded = uri.encode(uri.encode(url))
                 assert encoded == url
 
-    def test_uri_encode_value(self):
+    @staticmethod
+    def test_uri_encode_value():
         assert uri.encode_value('abcd') == 'abcd'
         assert uri.encode_value('abcd') == 'abcd'
         assert uri.encode_value('ab cd') == 'ab%20cd'
@@ -205,7 +215,8 @@ class TestFalconUtils:
         assert uri.encode_value('ab/cd') == 'ab%2Fcd'
         assert uri.encode_value('ab+cd=42,9') == 'ab%2Bcd%3D42%2C9'
 
-    def test_uri_decode(self, decode_approach):
+    @staticmethod
+    def test_uri_decode(decode_approach):
         assert uri.decode('abcd') == 'abcd'
         assert uri.decode('ab%20cd') == 'ab cd'
 
@@ -236,7 +247,8 @@ class TestFalconUtils:
     def test_uri_decode_bad_unicode(self, encoded, expected, decode_approach):
         assert uri.decode(encoded) == expected
 
-    def test_uri_decode_unquote_plus(self, decode_approach):
+    @staticmethod
+    def test_uri_decode_unquote_plus(decode_approach):
         assert uri.decode('/disk/lost+found/fd0') == '/disk/lost found/fd0'
         assert uri.decode('/disk/lost+found/fd0', unquote_plus=True) == (
             '/disk/lost found/fd0')
@@ -277,14 +289,16 @@ class TestFalconUtils:
             actual = uri.decode(case)
             assert expect == actual
 
-    def test_unquote_string(self):
+    @staticmethod
+    def test_unquote_string():
         assert uri.unquote_string('v') == 'v'
         assert uri.unquote_string('not-quoted') == 'not-quoted'
         assert uri.unquote_string('partial-quoted"') == 'partial-quoted"'
         assert uri.unquote_string('"partial-quoted') == '"partial-quoted'
         assert uri.unquote_string('"partial-quoted"') == 'partial-quoted'
 
-    def test_parse_query_string(self):
+    @staticmethod
+    def test_parse_query_string():
         query_string = (
             'a=http%3A%2F%2Ffalconframework.org%3Ftest%3D1'
             '&b=%7B%22test1%22%3A%20%22data1%22%'
@@ -353,7 +367,8 @@ class TestFalconUtils:
         assert uri.parse_query_string(query_string, keep_blank=keep_blank) == (
             expected)
 
-    def test_parse_host(self):
+    @staticmethod
+    def test_parse_host():
         assert uri.parse_host('::1') == ('::1', None)
         assert uri.parse_host('2001:ODB8:AC10:FE01::') == ('2001:ODB8:AC10:FE01::', None)
         assert uri.parse_host(
@@ -381,12 +396,14 @@ class TestFalconUtils:
         assert uri.parse_host('falcon.example.com:9876') == ('falcon.example.com', 9876)
         assert uri.parse_host('falcon.example.com:42') == ('falcon.example.com', 42)
 
-    def test_get_http_status_warns(self):
+    @staticmethod
+    def test_get_http_status_warns():
         with pytest.warns(UserWarning, match='Please use falcon'):
             falcon.get_http_status(400)
 
     @pytest.mark.filterwarnings('ignore')
-    def test_get_http_status(self):
+    @staticmethod
+    def test_get_http_status():
         assert falcon.get_http_status(404) == falcon.HTTP_404
         assert falcon.get_http_status(404.3) == falcon.HTTP_404
         assert falcon.get_http_status('404.3') == falcon.HTTP_404
@@ -470,7 +487,8 @@ class TestFalconUtils:
         with pytest.raises(ValueError):
             falcon.http_status_to_code(v)
 
-    def test_etag_dumps_to_header_format(self):
+    @staticmethod
+    def test_etag_dumps_to_header_format():
         etag = structures.ETag('67ab43')
 
         assert etag.dumps() == '"67ab43"'
@@ -480,7 +498,8 @@ class TestFalconUtils:
 
         assert structures.ETag('67a b43').dumps() == '"67a b43"'
 
-    def test_etag_strong_vs_weak_comparison(self):
+    @staticmethod
+    def test_etag_strong_vs_weak_comparison():
         strong_67ab43_one = structures.ETag.loads('"67ab43"')
         strong_67ab43_too = structures.ETag.loads('"67ab43"')
         strong_67aB43 = structures.ETag.loads('"67aB43"')
@@ -524,7 +543,8 @@ class TestFalconUtils:
     def test_secure_filename(self, filename, expected):
         assert misc.secure_filename(filename) == expected
 
-    def test_secure_filename_empty_value(self):
+    @staticmethod
+    def test_secure_filename_empty_value():
         with pytest.raises(ValueError):
             misc.secure_filename('')
 
@@ -603,31 +623,38 @@ def test_simulate_free_functions(asgi, simulate):
 class TestFalconTestingUtils:
     """Verify some branches not covered elsewhere."""
 
-    def test_path_escape_chars_in_create_environ(self):
+    @staticmethod
+    def test_path_escape_chars_in_create_environ():
         env = testing.create_environ('/hello%20world%21')
         assert env['PATH_INFO'] == '/hello world!'
 
-    def test_no_prefix_allowed_for_query_strings_in_create_environ(self):
+    @staticmethod
+    def test_no_prefix_allowed_for_query_strings_in_create_environ():
         with pytest.raises(ValueError):
             testing.create_environ(query_string='?foo=bar')
 
-    def test_plus_in_path_in_create_environ(self):
+    @staticmethod
+    def test_plus_in_path_in_create_environ():
         env = testing.create_environ('/mnt/grub2/lost+found/inode001')
         assert env['PATH_INFO'] == '/mnt/grub2/lost+found/inode001'
 
-    def test_none_header_value_in_create_environ(self):
+    @staticmethod
+    def test_none_header_value_in_create_environ():
         env = testing.create_environ('/', headers={'X-Foo': None})
         assert env['HTTP_X_FOO'] == ''
 
-    def test_decode_empty_result(self, app):
+    @staticmethod
+    def test_decode_empty_result(app):
         client = testing.TestClient(app)
         response = client.simulate_request(path='/')
         assert response.json == falcon.HTTPNotFound().to_dict()
 
-    def test_httpnow_alias_for_backwards_compat(self):
+    @staticmethod
+    def test_httpnow_alias_for_backwards_compat():
         assert testing.httpnow is util.http_now
 
-    def test_default_headers(self, app):
+    @staticmethod
+    def test_default_headers(app):
         resource = testing.SimpleTestResource()
         app.add_route('/', resource)
 
@@ -643,7 +670,8 @@ class TestFalconTestingUtils:
         client.simulate_get(headers=None)
         assert resource.captured_req.auth == headers['Authorization']
 
-    def test_default_headers_with_override(self, app):
+    @staticmethod
+    def test_default_headers_with_override(app):
         resource = testing.SimpleTestResource()
         app.add_route('/', resource)
 
@@ -663,7 +691,8 @@ class TestFalconTestingUtils:
         assert resource.captured_req.accept == headers['Accept']
         assert resource.captured_req.get_header('X-Override-Me') == override_after
 
-    def test_status(self, app):
+    @staticmethod
+    def test_status(app):
         resource = testing.SimpleTestResource(status=falcon.HTTP_702)
         app.add_route('/', resource)
         client = testing.TestClient(app)
@@ -671,18 +700,21 @@ class TestFalconTestingUtils:
         result = client.simulate_get()
         assert result.status == falcon.HTTP_702
 
-    def test_wsgi_iterable_not_closeable(self):
+    @staticmethod
+    def test_wsgi_iterable_not_closeable():
         result = testing.Result([], falcon.HTTP_200, [])
         assert not result.content
         assert result.json is None
 
-    def test_path_must_start_with_slash(self, app):
+    @staticmethod
+    def test_path_must_start_with_slash(app):
         app.add_route('/', testing.SimpleTestResource())
         client = testing.TestClient(app)
         with pytest.raises(ValueError):
             client.simulate_get('foo')
 
-    def test_cached_text_in_result(self, app):
+    @staticmethod
+    def test_cached_text_in_result(app):
         app.add_route('/', testing.SimpleTestResource(body='test'))
         client = testing.TestClient(app)
 
@@ -697,9 +729,11 @@ class TestFalconTestingUtils:
         with pytest.raises(ValueError):
             resource_type(body='', json={})
 
-    def test_query_string(self, app):
+    @staticmethod
+    def test_query_string(app):
         class SomeResource:
-            def on_get(self, req, resp):
+            @staticmethod
+            def on_get(req, resp):
                 doc = {}
 
                 doc['oid'] = req.get_param_as_int('oid')
@@ -739,13 +773,15 @@ class TestFalconTestingUtils:
                                      params_csv=True)
         assert result.json['query_string'] == expected_qs
 
-    def test_query_string_no_question(self, app):
+    @staticmethod
+    def test_query_string_no_question(app):
         app.add_route('/', testing.SimpleTestResource())
         client = testing.TestClient(app)
         with pytest.raises(ValueError):
             client.simulate_get(query_string='?x=1')
 
-    def test_query_string_in_path(self, app):
+    @staticmethod
+    def test_query_string_in_path(app):
         resource = testing.SimpleTestResource()
         app.add_route('/thing', resource)
         client = testing.TestClient(app)
@@ -814,7 +850,8 @@ class TestFalconTestingUtils:
     ])
     def test_simulate_remote_addr(self, app, remote_addr):
         class ShowMyIPResource:
-            def on_get(self, req, resp):
+            @staticmethod
+            def on_get(req, resp):
                 resp.body = req.remote_addr
                 resp.content_type = falcon.MEDIA_TEXT
 
@@ -829,7 +866,8 @@ class TestFalconTestingUtils:
         else:
             assert resp.text == remote_addr
 
-    def test_simulate_hostname(self, app):
+    @staticmethod
+    def test_simulate_hostname(app):
         resource = testing.SimpleTestResource()
         app.add_route('/', resource)
 
@@ -859,7 +897,8 @@ class TestFalconTestingUtils:
         for header, value in expected_headers:
             assert resource.captured_req.get_header(header) == value
 
-    def test_override_method_with_extras(self, asgi):
+    @staticmethod
+    def test_override_method_with_extras(asgi):
         app = create_app(asgi)
         app.add_route('/', testing.SimpleTestResource(body='test'))
         client = testing.TestClient(app)
@@ -1050,7 +1089,8 @@ class TestContextType:
 
 
 class TestDeprecatedArgs:
-    def test_method(self, recwarn):
+    @staticmethod
+    def test_method(recwarn):
         class C:
             @deprecation.deprecated_args(allowed_positional=0)
             def a_method(self, a=1, b=2):
@@ -1061,7 +1101,8 @@ class TestDeprecatedArgs:
         C().a_method(1, b=2)
         assert len(recwarn) == 1
 
-    def test_function(self, recwarn):
+    @staticmethod
+    def test_function(recwarn):
         @deprecation.deprecated_args(allowed_positional=0, is_method=False)
         def a_function(a=1, b=2):
             pass
