@@ -785,7 +785,8 @@ class App:
     # Helpers that require self
     # ------------------------------------------------------------------------
 
-    def _prepare_middleware(self, middleware=None, independent_middleware=False):
+    @staticmethod
+    def _prepare_middleware(middleware=None, independent_middleware=False):
         return helpers.prepare_middleware(
             middleware=middleware,
             independent_middleware=independent_middleware
@@ -867,7 +868,8 @@ class App:
 
         return (responder, params, resource, uri_template)
 
-    def _compose_status_response(self, req, resp, http_status):
+    @staticmethod
+    def _compose_status_response(req, resp, http_status):
         """Compose a response for the given HTTPStatus instance."""
 
         # PERF(kgriffs): The code to set the status and headers is identical

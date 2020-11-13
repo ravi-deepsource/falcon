@@ -7,7 +7,8 @@ import falcon.testing as testing
 
 class TestWSGIInterface:
 
-    def test_srmock(self):
+    @staticmethod
+    def test_srmock():
         mock = testing.StartResponseMock()
         mock(falcon.HTTP_200, ())
 
@@ -20,7 +21,8 @@ class TestWSGIInterface:
 
         assert mock.exc_info == exc_info
 
-    def test_pep3333(self):
+    @staticmethod
+    def test_pep3333():
         api = falcon.App()
         mock = testing.StartResponseMock()
 

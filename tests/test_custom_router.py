@@ -11,7 +11,8 @@ def test_custom_router_add_route_should_be_used(asgi):
     check = []
 
     class CustomRouter:
-        def add_route(self, uri_template, *args, **kwargs):
+        @staticmethod
+        def add_route(uri_template, *args, **kwargs):
             check.append(uri_template)
 
         def find(self, uri):
@@ -111,7 +112,8 @@ def test_custom_router_takes_req_positional_argument(asgi):
             resp.body = 'OK'
 
     class CustomRouter:
-        def find(self, uri, req):
+        @staticmethod
+        def find(uri, req):
             if uri == '/test' and isinstance(req, falcon.Request):
                 return responder, {'GET': responder}, {}, None
 
@@ -132,7 +134,8 @@ def test_custom_router_takes_req_keyword_argument(asgi):
             resp.body = 'OK'
 
     class CustomRouter:
-        def find(self, uri, req=None):
+        @staticmethod
+        def find(uri, req=None):
             if uri == '/test' and isinstance(req, falcon.Request):
                 return responder, {'GET': responder}, {}, None
 

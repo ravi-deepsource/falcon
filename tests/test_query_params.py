@@ -83,7 +83,8 @@ def simulate_request(request):
 
 
 class TestQueryParams:
-    def test_none(self, simulate_request, client, resource):
+    @staticmethod
+    def test_none(simulate_request, client, resource):
         query_string = ''
         client.app.add_route('/', resource)  # TODO: DRY up this setup logic
         simulate_request(client=client, path='/', query_string=query_string)
@@ -98,7 +99,8 @@ class TestQueryParams:
         assert req.get_param_as_bool('limit') is None
         assert req.get_param_as_list('limit') is None
 
-    def test_default(self, simulate_request, client, resource):
+    @staticmethod
+    def test_default(simulate_request, client, resource):
         default = 'foobar'
         query_string = ''
         client.app.add_route('/', resource)  # TODO: DRY up this setup logic
@@ -114,7 +116,8 @@ class TestQueryParams:
         assert req.get_param_as_bool('limit', default=default) == 'foobar'
         assert req.get_param_as_list('limit', default=default) == 'foobar'
 
-    def test_blank(self, simulate_request, client, resource):
+    @staticmethod
+    def test_blank(simulate_request, client, resource):
         query_string = 'marker='
         client.app.add_route('/', resource)
         client.app.req_options.keep_blank_qs_values = False
@@ -127,7 +130,8 @@ class TestQueryParams:
         assert req.get_param('marker', store=store) is None
         assert 'marker' not in store
 
-    def test_simple(self, simulate_request, client, resource):
+    @staticmethod
+    def test_simple(simulate_request, client, resource):
         query_string = 'marker=deadbeef&limit=25'
         client.app.add_route('/', resource)
         simulate_request(client=client, path='/', query_string=query_string)
@@ -140,7 +144,8 @@ class TestQueryParams:
         assert store['marker'] == 'deadbeef'
         assert store['limit'] == '25'
 
-    def test_percent_encoded(self, simulate_request, client, resource):
+    @staticmethod
+    def test_percent_encoded(simulate_request, client, resource):
         query_string = 'id=23,42&q=%e8%b1%86+%e7%93%a3'
         client.app.add_route('/', resource)
         client.app.req_options.auto_parse_qs_csv = True
@@ -155,7 +160,8 @@ class TestQueryParams:
         assert req.get_param_as_list('id', int) == [23, 42]
         assert req.get_param('q') == '\u8c46 \u74e3'
 
-    def test_option_auto_parse_qs_csv_simple_false(self, simulate_request, client, resource):
+    @staticmethod
+    def test_option_auto_parse_qs_csv_simple_false(simulate_request, client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.auto_parse_qs_csv = False
 
@@ -168,7 +174,8 @@ class TestQueryParams:
         assert req.get_param('id') in ['23,42,,', '2']
         assert req.get_param_as_list('id') == ['23,42,,', '2']
 
-    def test_option_auto_parse_qs_csv_simple_true(self, simulate_request, client, resource):
+    @staticmethod
+    def test_option_auto_parse_qs_csv_simple_true(simulate_request, client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.auto_parse_qs_csv = True
         client.app.req_options.keep_blank_qs_values = False
@@ -182,7 +189,8 @@ class TestQueryParams:
         assert req.get_param('id') in ['23', '42', '2']
         assert req.get_param_as_list('id', int) == [23, 42, 2]
 
-    def test_option_auto_parse_qs_csv_complex_false(self, simulate_request, client, resource):
+    @staticmethod
+    def test_option_auto_parse_qs_csv_complex_false(simulate_request, client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.auto_parse_qs_csv = False
         client.app.req_options.keep_blank_qs_values = False
@@ -214,7 +222,8 @@ class TestQueryParams:
 
         assert req.get_param('thing') == decoded_json
 
-    def test_default_auto_parse_csv_behaviour(self, simulate_request, client, resource):
+    @staticmethod
+    def test_default_auto_parse_csv_behaviour(simulate_request, client, resource):
         client.app.add_route('/', resource=resource)
         query_string = 'id=1,2,,&id=3'
 
@@ -225,7 +234,8 @@ class TestQueryParams:
         assert req.get_param('id') == '3'
         assert req.get_param_as_list('id') == ['1,2,,', '3']
 
-    def test_bad_percentage(self, simulate_request, client, resource):
+    @staticmethod
+    def test_bad_percentage(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'x=%%20%+%&y=peregrine&z=%a%z%zz%1%20e'
         response = simulate_request(client=client, path='/', query_string=query_string)
@@ -236,7 +246,8 @@ class TestQueryParams:
         assert req.get_param('y') == 'peregrine'
         assert req.get_param('z') == '%a%z%zz%1 e'
 
-    def test_allowed_names(self, simulate_request, client, resource):
+    @staticmethod
+    def test_allowed_names(simulate_request, client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.keep_blank_qs_values = False
         query_string = ('p=0&p1=23&2p=foo&some-thing=that&blank=&'
@@ -280,7 +291,8 @@ class TestQueryParams:
             expected_desc = 'The "marker" parameter is required.'
             assert ex.description == expected_desc
 
-    def test_int(self, simulate_request, client, resource):
+    @staticmethod
+    def test_int(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'marker=deadbeef&limit=25'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -331,7 +343,8 @@ class TestQueryParams:
 
         assert req.get_param_as_int('limit', min_value=-24) == 25
 
-    def test_int_neg(self, simulate_request, client, resource):
+    @staticmethod
+    def test_int_neg(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'marker=deadbeef&pos=-7'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -355,7 +368,8 @@ class TestQueryParams:
         with pytest.raises(falcon.HTTPBadRequest):
             req.get_param_as_int('pos', min_value=0, max_value=10)
 
-    def test_float(self, simulate_request, client, resource):
+    @staticmethod
+    def test_float(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'marker=deadbeef&limit=25.1'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -406,7 +420,8 @@ class TestQueryParams:
 
         assert req.get_param_as_float('limit', min_value=-24) == 25.1
 
-    def test_float_neg(self, simulate_request, client, resource):
+    @staticmethod
+    def test_float_neg(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'marker=deadbeef&pos=-7.1'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -430,7 +445,8 @@ class TestQueryParams:
         with pytest.raises(falcon.HTTPBadRequest):
             req.get_param_as_float('pos', min_value=0, max_value=10)
 
-    def test_uuid(self, simulate_request, client, resource):
+    @staticmethod
+    def test_uuid(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = ('marker1=8d76b7b3-d0dd-46ca-ad6e-3989dcd66959&'
                         'marker2=64be949b-3433-4d36-a4a8-9f19d352fee8&'
@@ -457,7 +473,8 @@ class TestQueryParams:
         assert req.get_param_as_uuid('marker1', store=store)
         assert store['marker1'] == expected_uuid
 
-    def test_boolean(self, simulate_request, client, resource):
+    @staticmethod
+    def test_boolean(simulate_request, client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.keep_blank_qs_values = False
         query_string = '&'.join([
@@ -513,7 +530,8 @@ class TestQueryParams:
         assert req.get_param_as_bool('echo', store=store) is True
         assert store['echo'] is True
 
-    def test_boolean_blank(self, simulate_request, client, resource):
+    @staticmethod
+    def test_boolean_blank(simulate_request, client, resource):
         client.app.add_route('/', resource)
         simulate_request(client=client, path='/', query_string='blank&blank2=')
 
@@ -531,7 +549,8 @@ class TestQueryParams:
         assert req.get_param_as_bool('nichts', default=False) is False
         assert req.get_param_as_bool('nichts', default=True) is True
 
-    def test_list_type(self, simulate_request, client, resource):
+    @staticmethod
+    def test_list_type(simulate_request, client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.auto_parse_qs_csv = True
         client.app.req_options.keep_blank_qs_values = False
@@ -575,7 +594,8 @@ class TestQueryParams:
         assert req.get_param_as_list('limit', store=store) == ['1']
         assert store['limit'] == ['1']
 
-    def test_list_type_blank(self, simulate_request, client, resource):
+    @staticmethod
+    def test_list_type_blank(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = ('colors=red,green,blue&limit=1'
                         '&list-ish1=f,,x&list-ish2=,0&list-ish3=a,,,b'
@@ -623,7 +643,8 @@ class TestQueryParams:
         assert req.get_param_as_list('empty5') == ['', '', '']
         assert req.get_param_as_list('empty4') == req.get_param_as_list('empty5')
 
-    def test_list_transformer(self, simulate_request, client, resource):
+    @staticmethod
+    def test_list_transformer(simulate_request, client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.auto_parse_qs_csv = True
         client.app.req_options.keep_blank_qs_values = False
@@ -657,7 +678,8 @@ class TestQueryParams:
                              'The value is not formatted correctly.')
             assert ex.description == expected_desc
 
-    def test_param_property(self, simulate_request, client, resource):
+    @staticmethod
+    def test_param_property(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'ant=4&bee=3&cat=2&dog=1'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -668,7 +690,8 @@ class TestQueryParams:
             [('ant', '4'), ('bee', '3'), ('cat', '2'), ('dog', '1')]
         )
 
-    def test_multiple_form_keys(self, simulate_request, client, resource):
+    @staticmethod
+    def test_multiple_form_keys(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'ant=1&ant=2&bee=3&cat=6&cat=5&cat=4'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -682,28 +705,32 @@ class TestQueryParams:
         # There are three 'cat' keys; order is preserved.
         assert req.get_param('cat') in ('6', '5', '4')
 
-    def test_multiple_keys_as_bool(self, simulate_request, client, resource):
+    @staticmethod
+    def test_multiple_keys_as_bool(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'ant=true&ant=yes&ant=True'
         simulate_request(client=client, path='/', query_string=query_string)
         req = resource.captured_req
         assert req.get_param_as_bool('ant') is True
 
-    def test_multiple_keys_as_int(self, simulate_request, client, resource):
+    @staticmethod
+    def test_multiple_keys_as_int(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'ant=1&ant=2&ant=3'
         simulate_request(client=client, path='/', query_string=query_string)
         req = resource.captured_req
         assert req.get_param_as_int('ant') in (1, 2, 3)
 
-    def test_multiple_keys_as_float(self, simulate_request, client, resource):
+    @staticmethod
+    def test_multiple_keys_as_float(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'ant=1.1&ant=2.2&ant=3.3'
         simulate_request(client=client, path='/', query_string=query_string)
         req = resource.captured_req
         assert req.get_param_as_float('ant') in (1.1, 2.2, 3.3)
 
-    def test_multiple_form_keys_as_list(self, simulate_request, client, resource):
+    @staticmethod
+    def test_multiple_form_keys_as_list(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'ant=1&ant=2&bee=3&cat=6&cat=5&cat=4'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -716,7 +743,8 @@ class TestQueryParams:
         # There are three 'cat' keys; order is preserved.
         assert req.get_param_as_list('cat') == ['6', '5', '4']
 
-    def test_get_date_valid(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_date_valid(simulate_request, client, resource):
         client.app.add_route('/', resource)
         date_value = '2015-04-20'
         query_string = 'thedate={}'.format(date_value)
@@ -724,14 +752,16 @@ class TestQueryParams:
         req = resource.captured_req
         assert req.get_param_as_date('thedate') == date(2015, 4, 20)
 
-    def test_get_date_missing_param(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_date_missing_param(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'notthedate=2015-04-20'
         simulate_request(client=client, path='/', query_string=query_string)
         req = resource.captured_req
         assert req.get_param_as_date('thedate') is None
 
-    def test_get_date_valid_with_format(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_date_valid_with_format(simulate_request, client, resource):
         client.app.add_route('/', resource)
         date_value = '20150420'
         query_string = 'thedate={}'.format(date_value)
@@ -740,7 +770,8 @@ class TestQueryParams:
         req = resource.captured_req
         assert req.get_param_as_date('thedate', format_string=format_string) == date(2015, 4, 20)
 
-    def test_get_date_store(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_date_store(simulate_request, client, resource):
         client.app.add_route('/', resource)
         date_value = '2015-04-20'
         query_string = 'thedate={}'.format(date_value)
@@ -750,7 +781,8 @@ class TestQueryParams:
         req.get_param_as_date('thedate', store=store)
         assert len(store) != 0
 
-    def test_get_date_invalid(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_date_invalid(simulate_request, client, resource):
         client.app.add_route('/', resource)
         date_value = 'notarealvalue'
         query_string = 'thedate={}'.format(date_value)
@@ -760,7 +792,8 @@ class TestQueryParams:
         with pytest.raises(HTTPInvalidParam):
             req.get_param_as_date('thedate', format_string=format_string)
 
-    def test_get_datetime_valid(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_datetime_valid(simulate_request, client, resource):
         client.app.add_route('/', resource)
         date_value = '2015-04-20T10:10:10Z'
         query_string = 'thedate={}'.format(date_value)
@@ -768,14 +801,16 @@ class TestQueryParams:
         req = resource.captured_req
         assert req.get_param_as_datetime('thedate') == datetime(2015, 4, 20, 10, 10, 10)
 
-    def test_get_datetime_missing_param(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_datetime_missing_param(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'notthedate=2015-04-20T10:10:10Z'
         simulate_request(client=client, path='/', query_string=query_string)
         req = resource.captured_req
         assert req.get_param_as_datetime('thedate') is None
 
-    def test_get_datetime_valid_with_format(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_datetime_valid_with_format(simulate_request, client, resource):
         client.app.add_route('/', resource)
         date_value = '20150420 10:10:10'
         query_string = 'thedate={}'.format(date_value)
@@ -785,7 +820,8 @@ class TestQueryParams:
         assert req.get_param_as_datetime(
             'thedate', format_string=format_string) == datetime(2015, 4, 20, 10, 10, 10)
 
-    def test_get_datetime_store(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_datetime_store(simulate_request, client, resource):
         client.app.add_route('/', resource)
         datetime_value = '2015-04-20T10:10:10Z'
         query_string = 'thedate={}'.format(datetime_value)
@@ -796,7 +832,8 @@ class TestQueryParams:
         assert len(store) != 0
         assert store.get('thedate') == datetime(2015, 4, 20, 10, 10, 10)
 
-    def test_get_datetime_invalid(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_datetime_invalid(simulate_request, client, resource):
         client.app.add_route('/', resource)
         date_value = 'notarealvalue'
         query_string = 'thedate={}'.format(date_value)
@@ -806,7 +843,8 @@ class TestQueryParams:
         with pytest.raises(HTTPInvalidParam):
             req.get_param_as_datetime('thedate', format_string=format_string)
 
-    def test_get_dict_valid(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_dict_valid(simulate_request, client, resource):
         client.app.add_route('/', resource)
         payload_dict = {'foo': 'bar'}
         query_string = 'payload={}'.format(json.dumps(payload_dict))
@@ -814,7 +852,8 @@ class TestQueryParams:
         req = resource.captured_req
         assert req.get_param_as_json('payload') == payload_dict
 
-    def test_get_dict_missing_param(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_dict_missing_param(simulate_request, client, resource):
         client.app.add_route('/', resource)
         payload_dict = {'foo': 'bar'}
         query_string = 'notthepayload={}'.format(json.dumps(payload_dict))
@@ -822,7 +861,8 @@ class TestQueryParams:
         req = resource.captured_req
         assert req.get_param_as_json('payload') is None
 
-    def test_get_dict_store(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_dict_store(simulate_request, client, resource):
         client.app.add_route('/', resource)
         payload_dict = {'foo': 'bar'}
         query_string = 'payload={}'.format(json.dumps(payload_dict))
@@ -832,7 +872,8 @@ class TestQueryParams:
         req.get_param_as_json('payload', store=store)
         assert len(store) != 0
 
-    def test_get_dict_invalid(self, simulate_request, client, resource):
+    @staticmethod
+    def test_get_dict_invalid(simulate_request, client, resource):
         client.app.add_route('/', resource)
         payload_dict = 'foobar'
         query_string = 'payload={}'.format(payload_dict)
@@ -841,7 +882,8 @@ class TestQueryParams:
         with pytest.raises(HTTPInvalidParam):
             req.get_param_as_json('payload')
 
-    def test_has_param(self, simulate_request, client, resource):
+    @staticmethod
+    def test_has_param(simulate_request, client, resource):
         client.app.add_route('/', resource)
         query_string = 'ant=1'
         simulate_request(client=client, path='/', query_string=query_string)
@@ -857,7 +899,8 @@ class TestQueryParams:
 
 class TestPostQueryParams:
     @pytest.mark.parametrize('http_method', ('POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'))
-    def test_http_methods_body_expected(self, client, resource, http_method):
+    @staticmethod
+    def test_http_methods_body_expected(client, resource, http_method):
         client.app.add_route('/', resource)
         query_string = 'marker=deadbeef&limit=25'
         simulate_request_post_query_params(client=client, path='/', query_string=query_string,
@@ -868,7 +911,8 @@ class TestPostQueryParams:
         assert req.get_param('limit') == '25'
 
     @pytest.mark.parametrize('http_method', ('GET', 'HEAD'))
-    def test_http_methods_body_not_expected(self, client, resource, http_method):
+    @staticmethod
+    def test_http_methods_body_not_expected(client, resource, http_method):
         client.app.add_route('/', resource)
         query_string = 'marker=deadbeef&limit=25'
         simulate_request_post_query_params(client=client, path='/', query_string=query_string,
@@ -878,7 +922,8 @@ class TestPostQueryParams:
         assert req.get_param('marker') is None
         assert req.get_param('limit') is None
 
-    def test_non_ascii(self, client, resource):
+    @staticmethod
+    def test_non_ascii(client, resource):
         client.app.add_route('/', resource)
         value = '\u8c46\u74e3'
         query_string = b'q=' + value.encode('utf-8')
@@ -887,21 +932,24 @@ class TestPostQueryParams:
         req = resource.captured_req
         assert req.get_param('q') is None
 
-    def test_empty_body(self, client, resource):
+    @staticmethod
+    def test_empty_body(client, resource):
         client.app.add_route('/', resource)
         simulate_request_post_query_params(client=client, path='/', query_string=None)
 
         req = resource.captured_req
         assert req.get_param('q') is None
 
-    def test_empty_body_no_content_length(self, client, resource):
+    @staticmethod
+    def test_empty_body_no_content_length(client, resource):
         client.app.add_route('/', resource)
         simulate_request_post_query_params(client=client, path='/', query_string=None)
 
         req = resource.captured_req
         assert req.get_param('q') is None
 
-    def test_explicitly_disable_auto_parse(self, client, resource):
+    @staticmethod
+    def test_explicitly_disable_auto_parse(client, resource):
         client.app.add_route('/', resource)
         client.app.req_options.auto_parse_form_urlencoded = False
         simulate_request_post_query_params(client=client, path='/', query_string='q=42')
@@ -909,7 +957,8 @@ class TestPostQueryParams:
         req = resource.captured_req
         assert req.get_param('q') is None
 
-    def test_asgi_raises_error(self, resource):
+    @staticmethod
+    def test_asgi_raises_error(resource):
         app = create_app(asgi=True)
         app.add_route('/', resource)
         app.req_options.auto_parse_form_urlencoded = True
@@ -920,7 +969,8 @@ class TestPostQueryParams:
 
 @pytest.mark.parametrize('asgi', [True, False])
 class TestPostQueryParamsDefaultBehavior:
-    def test_dont_auto_parse_by_default(self, asgi):
+    @staticmethod
+    def test_dont_auto_parse_by_default(asgi):
         app = create_app(asgi)
         resource = testing.SimpleTestResource()
         app.add_route('/', resource)

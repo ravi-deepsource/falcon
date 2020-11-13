@@ -3,5 +3,6 @@ from unittest import TestCase
 
 class TestUnits(TestCase):
 
-    def test_units(self):
+    @staticmethod
+    def test_units():
         assert 5 * 5 == 25

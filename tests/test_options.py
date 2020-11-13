@@ -5,7 +5,8 @@ from falcon.request import RequestOptions
 
 class TestRequestOptions:
 
-    def test_option_defaults(self):
+    @staticmethod
+    def test_option_defaults():
         options = RequestOptions()
 
         assert options.keep_blank_qs_values
@@ -28,7 +29,8 @@ class TestRequestOptions:
         setattr(options, option_name, False)
         assert not getattr(options, option_name)
 
-    def test_incorrect_options(self):
+    @staticmethod
+    def test_incorrect_options():
         options = RequestOptions()
 
         def _assign_invalid():

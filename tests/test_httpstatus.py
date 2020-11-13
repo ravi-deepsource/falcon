@@ -44,12 +44,14 @@ def noop_after_hook(req, resp, resource):
 class TestStatusResource:
 
     @falcon.before(before_hook)
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         resp.status = falcon.HTTP_500
         resp.set_header('X-Failed', 'True')
         resp.body = 'Fail'
 
-    def on_post(self, req, resp):
+    @staticmethod
+    def on_post(req, resp):
         resp.status = falcon.HTTP_500
         resp.set_header('X-Failed', 'True')
         resp.body = 'Fail'
@@ -59,18 +61,21 @@ class TestStatusResource:
                          body='Pass')
 
     @falcon.after(after_hook)
-    def on_put(self, req, resp):
+    @staticmethod
+    def on_put(req, resp):
         # NOTE(kgriffs): Test that passing a unicode status string
         # works just fine.
         resp.status = '500 Internal Server Error'
         resp.set_header('X-Failed', 'True')
         resp.body = 'Fail'
 
-    def on_patch(self, req, resp):
+    @staticmethod
+    def on_patch(req, resp):
         raise HTTPStatus(falcon.HTTP_200, body=None)
 
     @falcon.after(noop_after_hook)
-    def on_delete(self, req, resp):
+    @staticmethod
+    def on_delete(req, resp):
         raise HTTPStatus(falcon.HTTP_200,
                          headers={'X-Failed': 'False'},
                          body='Pass')
@@ -78,51 +83,59 @@ class TestStatusResource:
 
 class TestHookResource:
 
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         resp.status = falcon.HTTP_500
         resp.set_header('X-Failed', 'True')
         resp.body = 'Fail'
 
-    def on_patch(self, req, resp):
+    @staticmethod
+    def on_patch(req, resp):
         raise HTTPStatus(falcon.HTTP_200,
                          body=None)
 
-    def on_delete(self, req, resp):
+    @staticmethod
+    def on_delete(req, resp):
         raise HTTPStatus(falcon.HTTP_200,
                          headers={'X-Failed': 'False'},
                          body='Pass')
 
 
 class TestHTTPStatus:
-    def test_raise_status_in_before_hook(self, client):
+    @staticmethod
+    def test_raise_status_in_before_hook(client):
         """ Make sure we get the 200 raised by before hook """
         response = client.simulate_request(path='/status', method='GET')
         assert response.status == falcon.HTTP_200
         assert response.headers['x-failed'] == 'False'
         assert response.text == 'Pass'
 
-    def test_raise_status_in_responder(self, client):
+    @staticmethod
+    def test_raise_status_in_responder(client):
         """ Make sure we get the 200 raised by responder """
         response = client.simulate_request(path='/status', method='POST')
         assert response.status == falcon.HTTP_200
         assert response.headers['x-failed'] == 'False'
         assert response.text == 'Pass'
 
-    def test_raise_status_runs_after_hooks(self, client):
+    @staticmethod
+    def test_raise_status_runs_after_hooks(client):
         """ Make sure after hooks still run """
         response = client.simulate_request(path='/status', method='PUT')
         assert response.status == falcon.HTTP_200
         assert response.headers['x-failed'] == 'False'
         assert response.text == 'Pass'
 
-    def test_raise_status_survives_after_hooks(self, client):
+    @staticmethod
+    def test_raise_status_survives_after_hooks(client):
         """ Make sure after hook doesn't overwrite our status """
         response = client.simulate_request(path='/status', method='DELETE')
         assert response.status == falcon.HTTP_200
         assert response.headers['x-failed'] == 'False'
         assert response.text == 'Pass'
 
-    def test_raise_status_empty_body(self, client):
+    @staticmethod
+    def test_raise_status_empty_body(client):
         """ Make sure passing None to body results in empty body """
         response = client.simulate_request(path='/status', method='PATCH')
         assert response.text == ''
@@ -135,7 +148,8 @@ class TestHTTPStatusWithMiddleware:
         client = hook_test_client
 
         class TestMiddleware:
-            def process_request(self, req, resp):
+            @staticmethod
+            def process_request(req, resp):
                 raise HTTPStatus(falcon.HTTP_200,
                                  headers={'X-Failed': 'False'},
                                  body='Pass')
@@ -157,7 +171,8 @@ class TestHTTPStatusWithMiddleware:
         client = hook_test_client
 
         class TestMiddleware:
-            def process_resource(self, req, resp, resource, params):
+            @staticmethod
+            def process_resource(req, resp, resource, params):
                 raise HTTPStatus(falcon.HTTP_200,
                                  headers={'X-Failed': 'False'},
                                  body='Pass')
@@ -178,7 +193,8 @@ class TestHTTPStatusWithMiddleware:
         client = hook_test_client
 
         class TestMiddleware:
-            def process_response(self, req, resp, resource, req_succeeded):
+            @staticmethod
+            def process_response(req, resp, resource, req_succeeded):
                 resp.status = falcon.HTTP_200
                 resp.set_header('X-Failed', 'False')
                 resp.body = 'Pass'
@@ -197,15 +213,18 @@ class TestHTTPStatusWithMiddleware:
 
 
 class NoBodyResource:
-    def on_get(self, req, res):
+    @staticmethod
+    def on_get(req, res):
         res.data = b'foo'
         raise HTTPStatus(falcon.HTTP_745)
 
-    def on_post(self, req, res):
+    @staticmethod
+    def on_post(req, res):
         res.media = {'a': 1}
         raise HTTPStatus(falcon.HTTP_725)
 
-    def on_put(self, req, res):
+    @staticmethod
+    def on_put(req, res):
         res.body = 'foo'
         raise HTTPStatus(falcon.HTTP_719)
 
@@ -218,17 +237,20 @@ def body_client(asgi):
 
 
 class TestNoBodyWithStatus:
-    def test_data_is_set(self, body_client):
+    @staticmethod
+    def test_data_is_set(body_client):
         res = body_client.simulate_get('/status')
         assert res.status == falcon.HTTP_745
         assert res.content == b''
 
-    def test_media_is_set(self, body_client):
+    @staticmethod
+    def test_media_is_set(body_client):
         res = body_client.simulate_post('/status')
         assert res.status == falcon.HTTP_725
         assert res.content == b''
 
-    def test_body_is_set(self, body_client):
+    @staticmethod
+    def test_body_is_set(body_client):
         res = body_client.simulate_put('/status')
         assert res.status == falcon.HTTP_719
         assert res.content == b''
@@ -238,7 +260,8 @@ class TestNoBodyWithStatus:
 def custom_status_client(asgi):
     def client(status):
         class Resource:
-            def on_get(self, req, resp):
+            @staticmethod
+            def on_get(req, resp):
                 resp.content_type = falcon.MEDIA_TEXT
                 resp.data = b'Hello, World!'
                 resp.status = status

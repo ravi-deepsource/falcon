@@ -184,10 +184,8 @@ class _ResultBase:
             if name.lower() == 'set-cookie':
                 cookies.load(value)
 
-        self._cookies = dict(
-            (morsel.key, Cookie(morsel))
-            for morsel in cookies.values()
-        )
+        self._cookies = {morsel.key: Cookie(morsel)
+            for morsel in cookies.values()}
 
         self._encoding = helpers.get_encoding_from_headers(self._headers)
 
@@ -1750,7 +1748,8 @@ class TestClient:
 
         # NOTE(kgriffs): We normally do not expect someone to try to nest
         #   contexts, so this is just a sanity-check.
-        assert not self._conductor
+        if self._conductor:
+            raise AssertionError
 
         self._conductor = ASGIConductor(self.app, headers=self._default_headers)
         await self._conductor.__aenter__()

@@ -157,7 +157,8 @@ def test_mimeparse_edgecases(client):
 
 
 class TestRenderBodyPrecedence:
-    def test_body(self, client):
+    @staticmethod
+    def test_body(client):
         client.simulate_get('/')
 
         resp = client.resource.captured_resp
@@ -168,7 +169,8 @@ class TestRenderBodyPrecedence:
 
         assert resp.render_body() == b'body'
 
-    def test_data(self, client):
+    @staticmethod
+    def test_data(client):
         client.simulate_get('/')
 
         resp = client.resource.captured_resp
@@ -178,7 +180,8 @@ class TestRenderBodyPrecedence:
 
         assert resp.render_body() == b'data'
 
-    def test_media(self, client):
+    @staticmethod
+    def test_media(client):
         client.simulate_get('/')
 
         resp = client.resource.captured_resp
