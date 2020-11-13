@@ -430,7 +430,8 @@ class CompiledRouter:
                     # segment as the value for the param.
 
                     if node.var_converter_map:
-                        assert len(node.var_converter_map) == 1
+                        if len(node.var_converter_map) != 1:
+                            raise AssertionError
 
                         parent.append_child(_CxSetFragmentFromPath(level))
 
@@ -461,8 +462,9 @@ class CompiledRouter:
                     #   /foo/{id}/bar
                     #   /foo/{name}/bar
                     #
-                    assert len([_node for _node in nodes
-                                if _node.is_var and not _node.is_complex]) == 1
+                    if len([_node for _node in nodes
+                                if _node.is_var and not _node.is_complex]) != 1:
+                        raise AssertionError
                     found_simple = True
 
             else:
@@ -651,7 +653,8 @@ class CompiledRouterNode:
 
             if matches[0].span() == (0, len(raw_segment)):
                 # NOTE(kgriffs): Single field, spans entire segment
-                assert len(matches) == 1
+                if len(matches) != 1:
+                    raise AssertionError
 
                 # TODO(kgriffs): It is not "complex" because it only
                 # contains a single field. Rename this variable to make
@@ -690,7 +693,8 @@ class CompiledRouterNode:
                 self.var_pattern = re.compile(pattern_text)
 
         if self.is_complex:
-            assert self.is_var
+            if not self.is_var:
+                raise AssertionError
 
     def matches(self, segment):
         """Return True if this node matches the supplied template segment."""
@@ -704,7 +708,8 @@ class CompiledRouterNode:
         # checked if the segment matches. By definition, only unmatched
         # segments may conflict, so there isn't any sense in calling
         # conflicts_with in that case.
-        assert not self.matches(segment)
+        if self.matches(segment):
+            raise AssertionError
 
         # NOTE(kgriffs): Possible combinations are as follows.
         #
