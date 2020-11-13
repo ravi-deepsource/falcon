@@ -925,8 +925,6 @@ class TestErrorHandling(TestMiddleware):
 
 
 class TestShortCircuiting(TestMiddleware):
-    def setup_method(self, method):
-        super(TestShortCircuiting, self).setup_method(method)
 
     @staticmethod
     def _make_client(asgi, independent_middleware=True):
