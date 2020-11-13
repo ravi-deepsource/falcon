@@ -11,10 +11,12 @@ import requests
 
 class StorageEngine:
 
-    def get_things(self, marker, limit):
+    @staticmethod
+    def get_things(marker, limit):
         return [{'id': str(uuid.uuid4()), 'color': 'green'}]
 
-    def add_thing(self, thing):
+    @staticmethod
+    def add_thing(thing):
         thing['id'] = str(uuid.uuid4())
         return thing
 
@@ -70,13 +72,15 @@ class AuthMiddleware:
                                           challenges=challenges,
                                           href='http://docs.example.com/auth')
 
-    def _token_is_valid(self, token, account_id):
+    @staticmethod
+    def _token_is_valid(token, account_id):
         return True  # Suuuuuure it's valid...
 
 
 class RequireJSON:
 
-    def process_request(self, req, resp):
+    @staticmethod
+    def process_request(req, resp):
         if not req.client_accepts_json:
             raise falcon.HTTPNotAcceptable(
                 description='This API only supports responses encoded as JSON.',
@@ -94,7 +98,8 @@ class JSONTranslator:
     # this particular use case; this example serves only to illustrate
     # what is possible.
 
-    def process_request(self, req, resp):
+    @staticmethod
+    def process_request(req, resp):
         # req.stream corresponds to the WSGI wsgi.input environ variable,
         # and allows you to read bytes from the request body.
         #
@@ -119,7 +124,8 @@ class JSONTranslator:
             raise falcon.HTTPBadRequest(title='Malformed JSON',
                                         description=description)
 
-    def process_response(self, req, resp, resource, req_succeeded):
+    @staticmethod
+    def process_response(req, resp, resource, req_succeeded):
         if not hasattr(resp.context, 'result'):
             return
 

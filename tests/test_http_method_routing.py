@@ -137,22 +137,26 @@ class MiscResource:
         self.called = False
 
     @capture
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         resp.status = falcon.HTTP_204
 
     @capture
-    def on_head(self, req, resp):
+    @staticmethod
+    def on_head(req, resp):
         resp.status = falcon.HTTP_204
 
     @capture
-    def on_put(self, req, resp):
+    @staticmethod
+    def on_put(req, resp):
         resp.status = falcon.HTTP_400
 
     @capture
     def on_patch(self, req, resp):
         pass
 
-    def on_options(self, req, resp):
+    @staticmethod
+    def on_options(req, resp):
         # NOTE(kgriffs): The default responder returns 200
         resp.status = falcon.HTTP_204
 
@@ -167,10 +171,12 @@ class GetWithFaultyPutResource:
         self.called = False
 
     @capture
-    def on_get(self, req, resp):
+    @staticmethod
+    def on_get(req, resp):
         resp.status = falcon.HTTP_204
 
-    def on_put(self, req, resp, param):
+    @staticmethod
+    def on_put(req, resp, param):
         raise TypeError()
 
 
@@ -183,35 +189,40 @@ class FaultyDecoratedResource:
 
 class TestHttpMethodRouting:
 
-    def test_get(self, client, resource_things):
+    @staticmethod
+    def test_get(client, resource_things):
         client.app.add_route('/things', resource_things)
         client.app.add_route('/things/{id}/stuff/{sid}', resource_things)
         response = client.simulate_request(path='/things/42/stuff/57')
         assert response.status == falcon.HTTP_204
         assert resource_things.called
 
-    def test_put(self, client, resource_things):
+    @staticmethod
+    def test_put(client, resource_things):
         client.app.add_route('/things', resource_things)
         client.app.add_route('/things/{id}/stuff/{sid}', resource_things)
         response = client.simulate_request(path='/things/42/stuff/1337', method='PUT')
         assert response.status == falcon.HTTP_201
         assert resource_things.called
 
-    def test_post_not_allowed(self, client, resource_things):
+    @staticmethod
+    def test_post_not_allowed(client, resource_things):
         client.app.add_route('/things', resource_things)
         client.app.add_route('/things/{id}/stuff/{sid}', resource_things)
         response = client.simulate_request(path='/things/42/stuff/1337', method='POST')
         assert response.status == falcon.HTTP_405
         assert not resource_things.called
 
-    def test_report(self, client, resource_things):
+    @staticmethod
+    def test_report(client, resource_things):
         client.app.add_route('/things', resource_things)
         client.app.add_route('/things/{id}/stuff/{sid}', resource_things)
         response = client.simulate_request(path='/things/42/stuff/1337', method='REPORT')
         assert response.status == falcon.HTTP_204
         assert resource_things.called
 
-    def test_misc(self, client, resource_misc):
+    @staticmethod
+    def test_misc(client, resource_misc):
         client.app.add_route('/misc', resource_misc)
         for method in ['GET', 'HEAD', 'PUT', 'PATCH']:
             resource_misc.called = False
@@ -219,13 +230,15 @@ class TestHttpMethodRouting:
             assert resource_misc.called
             assert resource_misc.req.method == method
 
-    def test_methods_not_allowed_simple(self, client, stonewall):
+    @staticmethod
+    def test_methods_not_allowed_simple(client, stonewall):
         client.app.add_route('/stonewall', stonewall)
         for method in ['GET', 'HEAD', 'PUT', 'PATCH']:
             response = client.simulate_request(path='/stonewall', method=method)
             assert response.status == falcon.HTTP_405
 
-    def test_methods_not_allowed_complex(self, client, resource_things):
+    @staticmethod
+    def test_methods_not_allowed_complex(client, resource_things):
         client.app.add_route('/things', resource_things)
         client.app.add_route('/things/{id}/stuff/{sid}', resource_things)
         for method in HTTP_METHODS + WEBDAV_METHODS:
@@ -241,7 +254,8 @@ class TestHttpMethodRouting:
             headers = response.headers
             assert headers['allow'] == 'GET, HEAD, PUT, REPORT, OPTIONS'
 
-    def test_method_not_allowed_with_param(self, client, resource_get_with_faulty_put):
+    @staticmethod
+    def test_method_not_allowed_with_param(client, resource_get_with_faulty_put):
         client.app.add_route('/get_with_param/{param}', resource_get_with_faulty_put)
         for method in HTTP_METHODS + WEBDAV_METHODS:
             if method in ('GET', 'PUT', 'OPTIONS'):
@@ -259,7 +273,8 @@ class TestHttpMethodRouting:
             headers = response.headers
             assert headers['allow'] == 'GET, PUT, OPTIONS'
 
-    def test_default_on_options(self, client, resource_things):
+    @staticmethod
+    def test_default_on_options(client, resource_things):
         client.app.add_route('/things', resource_things)
         client.app.add_route('/things/{id}/stuff/{sid}', resource_things)
         response = client.simulate_request(path='/things/84/stuff/65', method='OPTIONS')
@@ -268,14 +283,16 @@ class TestHttpMethodRouting:
         headers = response.headers
         assert headers['allow'] == 'GET, HEAD, PUT, REPORT'
 
-    def test_on_options(self, client):
+    @staticmethod
+    def test_on_options(client):
         response = client.simulate_request(path='/misc', method='OPTIONS')
         assert response.status == falcon.HTTP_204
 
         headers = response.headers
         assert headers['allow'] == 'GET'
 
-    def test_bogus_method(self, client, resource_things):
+    @staticmethod
+    def test_bogus_method(client, resource_things):
         client.app.add_route('/things', resource_things)
         client.app.add_route('/things/{id}/stuff/{sid}', resource_things)
 

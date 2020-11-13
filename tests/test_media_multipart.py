@@ -324,7 +324,8 @@ async def test_async_unsupported():
 
 
 class MultipartAnalyzer:
-    def on_post(self, req, resp):
+    @staticmethod
+    def on_post(req, resp):
         values = []
         for part in req.media:
             values.append({
@@ -338,7 +339,8 @@ class MultipartAnalyzer:
 
         resp.media = values
 
-    def on_post_media(self, req, resp):
+    @staticmethod
+    def on_post_media(req, resp):
         deserialized = []
         for part in req.media:
             part_media = part.get_media()
@@ -347,7 +349,8 @@ class MultipartAnalyzer:
 
         resp.media = deserialized
 
-    def on_post_mirror(self, req, resp):
+    @staticmethod
+    def on_post_mirror(req, resp):
         parts = []
         for part in req.get_media():
             parts.append({
@@ -598,7 +601,8 @@ def test_invalid_random_form(client):
 
 def test_nested_multipart_mixed():
     class Forms:
-        def on_post(self, req, resp):
+        @staticmethod
+        def on_post(req, resp):
             example = {}
             for part in req.media:
                 if part.content_type.startswith('multipart/mixed'):

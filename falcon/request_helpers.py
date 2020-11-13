@@ -291,7 +291,8 @@ class BoundedStream(io.IOBase):
 
         return self._read(hint, self.stream.readlines)
 
-    def write(self, data):
+    @staticmethod
+    def write(data):
         """Raise IOError always; writing is not supported."""
 
         raise IOError('Stream is not writeable')
