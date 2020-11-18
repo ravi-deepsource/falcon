@@ -1000,7 +1000,7 @@ class TestContextType:
         copy.pop('foo')
         assert copy != ctx
 
-        assert set(key for key in ctx) == {'foo', 'details', 1, 2}
+        assert {key for key in ctx} == {'foo', 'details', 1, 2}
 
         assert ctx.get('foo') == 'bar'
         assert ctx.get('bar') is None
