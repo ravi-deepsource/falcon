@@ -1,5 +1,3 @@
-import random
-
 import pecan
 from pecan import expose, response, request
 
@@ -12,10 +10,10 @@ class TestController:
     def __init__(self, account_id):
         self.account_id = account_id
 
-    @expose(content_type='text/plain')
+    @expose(content_type="text/plain")
     def test(self):
-        user_agent = request.headers['User-Agent']  # NOQA
-        limit = request.params.get('limit', '10')  # NOQA
+        user_agent = request.headers["User-Agent"]  # NOQA
+        limit = request.params.get("limit", "10")  # NOQA
         response.headers.update(_headers)
 
         return _body
@@ -28,8 +26,7 @@ class HelloController:
 
 
 class RootController:
-
-    @expose(content_type='text/plain')
+    @expose(content_type="text/plain")
     def index(self):
         response.headers.update(_headers)
         return _body
