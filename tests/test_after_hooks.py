@@ -171,9 +171,7 @@ class WrappedClassResource:
 
 
 class WrappedClassResourceChild(WrappedClassResource):
-    def on_head(self, req, resp):
-        # Test passing no extra args
-        super(WrappedClassResourceChild, self).on_head(req, resp)
+    pass
 
 
 class ClassResourceWithURIFields:
