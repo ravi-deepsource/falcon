@@ -8,8 +8,7 @@ import falcon.testing as testing
 
 
 class CookieResource:
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         resp.set_cookie('foo', 'bar')
 
 

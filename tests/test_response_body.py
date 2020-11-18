@@ -46,8 +46,7 @@ def test_content_length_set_on_head_with_no_body(asgi):
 @pytest.mark.parametrize('method', ['GET', 'HEAD'])
 def test_content_length_not_set_when_streaming_response(asgi, method):
     class SynthesizedHead:
-        @staticmethod
-        def on_get(req, resp):
+        def on_get(self, req, resp):
             def words():
                 for word in ('Hello', ',', ' ', 'World!'):
                     yield word.encode()

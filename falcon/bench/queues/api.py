@@ -21,12 +21,10 @@ from falcon.bench.queues import stats
 
 
 class RequestIDComponent:
-    @staticmethod
-    def process_request(req, resp):
+    def process_request(self, req, resp):
         req.context.request_id = '<generate ID>'
 
-    @staticmethod
-    def process_response(req, resp, resource, req_succeeded):
+    def process_response(self, req, resp, resource, req_succeeded):
         resp.set_header('X-Request-ID', req.context.request_id)
 
 

@@ -5,12 +5,10 @@ from falcon import media, testing
 
 
 class MediaResource:
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         resp.media = {'foo': 'bar'}
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         resp.media = req.media
 
 

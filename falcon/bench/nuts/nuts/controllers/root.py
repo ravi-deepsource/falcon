@@ -13,8 +13,7 @@ class TestController:
         self.account_id = account_id
 
     @expose(content_type='text/plain')
-    @staticmethod
-    def test():
+    def test(self):
         user_agent = request.headers['User-Agent']  # NOQA
         limit = request.params.get('limit', '10')  # NOQA
         response.headers.update(_headers)
@@ -24,16 +23,14 @@ class TestController:
 
 class HelloController:
     @expose()
-    @staticmethod
-    def _lookup(account_id, *remainder):
+    def _lookup(self, account_id, *remainder):
         return TestController(account_id), remainder
 
 
 class RootController:
 
     @expose(content_type='text/plain')
-    @staticmethod
-    def index():
+    def index(self):
         response.headers.update(_headers)
         return _body
 

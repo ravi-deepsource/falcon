@@ -17,8 +17,7 @@ def resp_type(request):
 
 class TestResponseContext:
 
-    @staticmethod
-    def test_default_response_context(resp_type):
+    def test_default_response_context(self, resp_type):
         resp = resp_type()
 
         resp.context.hello = 'World!'
@@ -30,8 +29,7 @@ class TestResponseContext:
         assert hasattr(resp.context, 'note')
         assert resp.context.get('note') == resp.context['note']
 
-    @staticmethod
-    def test_custom_response_context(resp_type):
+    def test_custom_response_context(self, resp_type):
 
         class MyCustomContextType:
             pass
@@ -42,8 +40,7 @@ class TestResponseContext:
         resp = MyCustomResponse()
         assert isinstance(resp.context, MyCustomContextType)
 
-    @staticmethod
-    def test_custom_response_context_failure(resp_type):
+    def test_custom_response_context_failure(self, resp_type):
 
         class MyCustomResponse(resp_type):
             context_type = False
@@ -51,8 +48,7 @@ class TestResponseContext:
         with pytest.raises(TypeError):
             MyCustomResponse()
 
-    @staticmethod
-    def test_custom_response_context_factory(resp_type):
+    def test_custom_response_context_factory(self, resp_type):
 
         def create_context(resp):
             return {'resp': resp}

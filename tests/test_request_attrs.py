@@ -198,8 +198,7 @@ class TestRequestAttributes:
         uri_noqs = ('http://' + testing.DEFAULT_HOST + self.root_path + self.path)
         assert self.req_noqs.uri == uri_noqs
 
-    @staticmethod
-    def test_uri_https(asgi):
+    def test_uri_https(self, asgi):
         # =======================================================
         # Default port, implicit
         # =======================================================
@@ -332,8 +331,7 @@ class TestRequestAttributes:
 
         assert req_noapp.relative_uri == '/hello/' + '?' + self.qs
 
-    @staticmethod
-    def test_client_accepts(asgi):
+    def test_client_accepts(self, asgi):
         headers = {'Accept': 'application/xml'}
         req = create_req(asgi, headers=headers)
         assert req.client_accepts('application/xml')
@@ -403,15 +401,13 @@ class TestRequestAttributes:
         assert req.client_accepts('application/json')
         assert req.client_accepts('application/x-msgpack')
 
-    @staticmethod
-    def test_client_accepts_bogus(asgi):
+    def test_client_accepts_bogus(self, asgi):
         headers = {'Accept': '~'}
         req = create_req(asgi, headers=headers)
         assert not req.client_accepts('text/plain')
         assert not req.client_accepts('application/json')
 
-    @staticmethod
-    def test_client_accepts_props(asgi):
+    def test_client_accepts_props(self, asgi):
         headers = {'Accept': 'application/xml'}
         req = create_req(asgi, headers=headers)
         assert req.client_accepts_xml
@@ -450,8 +446,7 @@ class TestRequestAttributes:
         assert req.client_accepts_json
         assert req.client_accepts_msgpack
 
-    @staticmethod
-    def test_client_prefers(asgi):
+    def test_client_prefers(self, asgi):
         headers = {'Accept': 'application/xml'}
         req = create_req(asgi, headers=headers)
         preferred_type = req.client_prefers(['application/xml'])
@@ -474,8 +469,7 @@ class TestRequestAttributes:
         preferred_type = req.client_prefers(['application/xhtml+xml'])
         assert preferred_type is None
 
-    @staticmethod
-    def test_range(asgi):
+    def test_range(self, asgi):
         headers = {'Range': 'bytes=10-'}
         req = create_req(asgi, headers=headers)
         assert req.range == (10, -1)
@@ -500,8 +494,7 @@ class TestRequestAttributes:
         req = create_req(asgi)
         assert req.range is None
 
-    @staticmethod
-    def test_range_unit(asgi):
+    def test_range_unit(self, asgi):
         headers = {'Range': 'bytes=10-'}
         req = create_req(asgi, headers=headers)
         assert req.range == (10, -1)
@@ -616,16 +609,14 @@ class TestRequestAttributes:
                                  'Invalid header value', expected_desc,
                                  asgi)
 
-    @staticmethod
-    def test_missing_attribute_header(asgi):
+    def test_missing_attribute_header(self, asgi):
         req = create_req(asgi)
         assert req.range is None
 
         req = create_req(asgi)
         assert req.content_length is None
 
-    @staticmethod
-    def test_content_length(asgi):
+    def test_content_length(self, asgi):
         headers = {'content-length': '5656'}
         req = create_req(asgi, headers=headers)
         assert req.content_length == 5656
@@ -694,8 +685,7 @@ class TestRequestAttributes:
                                  asgi)
 
     @pytest.mark.parametrize('attr', ('date', 'if_modified_since', 'if_unmodified_since'))
-    @staticmethod
-    def test_date_missing(asgi, attr):
+    def test_date_missing(self, asgi, attr):
         req = create_req(asgi)
         assert getattr(req, attr) is None
 
@@ -836,13 +826,11 @@ class TestRequestAttributes:
         assert req.port == port
         assert req.netloc == '{}:{}'.format(host, port)
 
-    @staticmethod
-    def test_app_present(asgi):
+    def test_app_present(self, asgi):
         req = create_req(asgi, root_path='/moving-pictures')
         assert req.app == '/moving-pictures'
 
-    @staticmethod
-    def test_app_blank(asgi):
+    def test_app_blank(self, asgi):
         req = create_req(asgi, root_path='')
         assert req.app == ''
 
@@ -974,8 +962,7 @@ class TestRequestAttributes:
             assert self.req.if_none_match is None
 
     @pytest.mark.parametrize('header_value', ['', ' ', '  '])
-    @staticmethod
-    def test_etag_parsing_helper(asgi, header_value):
+    def test_etag_parsing_helper(self, asgi, header_value):
         # NOTE(kgriffs): Test a couple of cases that are not directly covered
         #   elsewhere (but that we want the helper to still support
         #   for the sake of avoiding suprises if they are ever called without
@@ -987,8 +974,7 @@ class TestRequestAttributes:
     # Helpers
     # -------------------------------------------------------------------------
 
-    @staticmethod
-    def _test_error_details(headers, attr_name,
+    def _test_error_details(self, headers, attr_name,
                             error_type, title, description, asgi):
         req = create_req(asgi, headers=headers)
 

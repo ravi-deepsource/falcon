@@ -49,9 +49,9 @@ _ALL_ALLOWED = _UNRESERVED + _DELIMITERS
 _HEX_DIGITS = '0123456789ABCDEFabcdef'
 
 # This map construction is based on urllib's implementation
-_HEX_TO_BYTE = {(a + b).encode(): bytes([int(a + b, 16)])
+_HEX_TO_BYTE = dict(((a + b).encode(), bytes([int(a + b, 16)]))
                     for a in _HEX_DIGITS
-                    for b in _HEX_DIGITS}
+                    for b in _HEX_DIGITS)
 
 _PYPY = platform.python_implementation() == 'PyPy'
 
@@ -414,7 +414,8 @@ def parse_host(host, default_port=None):
         pos = host.rfind(']:')
         if pos != -1:
             return (host[1:pos], int(host[pos + 2:]))
-        return (host[1:-1], default_port)
+        else:
+            return (host[1:-1], default_port)
 
     pos = host.rfind(':')
     if (pos == -1) or (pos != host.find(':')):
@@ -443,7 +444,7 @@ def unquote_string(quoted):
 
     if len(quoted) < 2:
         return quoted
-    if quoted[0] != '"' or quoted[-1] != '"':
+    elif quoted[0] != '"' or quoted[-1] != '"':
         # return original one, prevent side-effect
         return quoted
 
@@ -454,10 +455,11 @@ def unquote_string(quoted):
     # speed up string parsing by preventing unnecessary processes if possible.
     if '\\' not in tmp_quoted:
         return tmp_quoted
-    if r'\\' not in tmp_quoted:
+    elif r'\\' not in tmp_quoted:
         return tmp_quoted.replace('\\', '')
-    return '\\'.join([q.replace('\\', '')
-                      for q in tmp_quoted.split(r'\\')])
+    else:
+        return '\\'.join([q.replace('\\', '')
+                          for q in tmp_quoted.split(r'\\')])
 
 
 # TODO(vytas): Restructure this in favour of a cleaner way to hoist the pure

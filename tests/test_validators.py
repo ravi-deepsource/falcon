@@ -42,27 +42,23 @@ skip_missing_dep = pytest.mark.skipif(
 
 class Resource:
     @validators.jsonschema.validate(req_schema=_TEST_SCHEMA)
-    @staticmethod
-    def request_validated(req, resp):
+    def request_validated(self, req, resp):
         assert req.media is not None
         return resp
 
     @validators.jsonschema.validate(resp_schema=_TEST_SCHEMA)
-    @staticmethod
-    def response_validated(req, resp):
+    def response_validated(self, req, resp):
         assert resp.media is not None
         return resp
 
     @validators.jsonschema.validate(req_schema=_TEST_SCHEMA, resp_schema=_TEST_SCHEMA)
-    @staticmethod
-    def both_validated(req, resp):
+    def both_validated(self, req, resp):
         assert req.media is not None
         assert resp.media is not None
         return req, resp
 
     @validators.jsonschema.validate(req_schema=_TEST_SCHEMA, resp_schema=_TEST_SCHEMA)
-    @staticmethod
-    def on_put(req, resp):
+    def on_put(self, req, resp):
         assert req.media is not None
         resp.media = _VALID_MEDIA
 

@@ -37,18 +37,15 @@ class CaptureRequestMiddleware:
 
 class RequestTimeMiddleware:
 
-    @staticmethod
-    def process_request(req, resp):
+    def process_request(self, req, resp):
         global context
         context['start_time'] = datetime.utcnow()
 
-    @staticmethod
-    def process_resource(req, resp, resource, params):
+    def process_resource(self, req, resp, resource, params):
         global context
         context['mid_time'] = datetime.utcnow()
 
-    @staticmethod
-    def process_response(req, resp, resource, req_succeeded):
+    def process_response(self, req, resp, resource, req_succeeded):
         global context
         context['end_time'] = datetime.utcnow()
         context['req_succeeded'] = req_succeeded
@@ -65,13 +62,11 @@ class RequestTimeMiddleware:
 
 class TransactionIdMiddleware:
 
-    @staticmethod
-    def process_request(req, resp):
+    def process_request(self, req, resp):
         global context
         context['transaction_id'] = 'unique-req-id'
 
-    @staticmethod
-    def process_resource(req, resp, resource, params):
+    def process_resource(self, req, resp, resource, params):
         global context
         context['resource_transaction_id'] = 'unique-req-id-2'
 
@@ -125,8 +120,7 @@ class ExecutedLastMiddleware(ExecutedFirstMiddleware):
 
 class RemoveBasePathMiddleware:
 
-    @staticmethod
-    def process_request(req, resp):
+    def process_request(self, req, resp):
         req.path = req.path.replace('/base_path', '', 1)
 
 
@@ -150,8 +144,7 @@ class ResponseCacheMiddlware:
 
 class AccessParamsMiddleware:
 
-    @staticmethod
-    def process_resource(req, resp, resource, params):
+    def process_resource(self, req, resp, resource, params):
         global context
         params['added'] = True
         context['params'] = params
@@ -159,13 +152,11 @@ class AccessParamsMiddleware:
 
 class MiddlewareClassResource:
 
-    @staticmethod
-    def on_get(req, resp, **kwargs):
+    def on_get(self, req, resp, **kwargs):
         resp.status = falcon.HTTP_200
         resp.body = json.dumps(_EXPECTED_BODY)
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         raise falcon.HTTPForbidden(title=falcon.HTTP_403, description='Setec Astronomy')
 
 
@@ -179,15 +170,13 @@ class EmptySignatureMiddleware:
 
 
 class TestCorsResource:
-    @staticmethod
-    def on_get(req, resp, **kwargs):
+    def on_get(self, req, resp, **kwargs):
         resp.status = falcon.HTTP_200
         resp.body = 'Test'
 
 
 class TestMiddleware:
-    @staticmethod
-    def setup_method(method):
+    def setup_method(self, method):
         # Clear context
         global context
         context = {'executed_methods': []}
@@ -195,8 +184,7 @@ class TestMiddleware:
 
 class TestRequestTimeMiddleware(TestMiddleware):
 
-    @staticmethod
-    def test_skip_process_resource(asgi):
+    def test_skip_process_resource(self, asgi):
         global context
         app = create_app(asgi, middleware=[RequestTimeMiddleware()])
 
@@ -210,8 +198,7 @@ class TestRequestTimeMiddleware(TestMiddleware):
         assert 'end_time' in context
         assert not context['req_succeeded']
 
-    @staticmethod
-    def test_add_invalid_middleware(asgi):
+    def test_add_invalid_middleware(self, asgi):
         """Test than an invalid class can not be added as middleware"""
         class InvalidMiddleware():
             def process_request(self, *args):
@@ -229,13 +216,11 @@ class TestRequestTimeMiddleware(TestMiddleware):
         with pytest.raises(TypeError):
             create_app(asgi, middleware=mw_list)
 
-    @staticmethod
-    def test_response_middleware_raises_exception(asgi):
+    def test_response_middleware_raises_exception(self, asgi):
         """Test that error in response middleware is propagated up"""
         class RaiseErrorMiddleware:
 
-            @staticmethod
-            def process_response(req, resp, resource):
+            def process_response(self, req, resp, resource):
                 raise Exception('Always fail')
 
         app = create_app(asgi, middleware=[RaiseErrorMiddleware()])
@@ -247,8 +232,7 @@ class TestRequestTimeMiddleware(TestMiddleware):
         assert result.status_code == 500
 
     @pytest.mark.parametrize('independent_middleware', [True, False])
-    @staticmethod
-    def test_log_get_request(independent_middleware, asgi):
+    def test_log_get_request(self, independent_middleware, asgi):
         """Test that Log middleware is executed"""
         global context
         app = create_app(asgi, middleware=[RequestTimeMiddleware()],
@@ -273,8 +257,7 @@ class TestRequestTimeMiddleware(TestMiddleware):
 
 
 class TestTransactionIdMiddleware(TestMiddleware):
-    @staticmethod
-    def test_generate_trans_id_with_request(asgi):
+    def test_generate_trans_id_with_request(self, asgi):
         """Test that TransactionIdmiddleware is executed"""
         global context
 
@@ -294,8 +277,7 @@ class TestTransactionIdMiddleware(TestMiddleware):
 class TestSeveralMiddlewares(TestMiddleware):
 
     @pytest.mark.parametrize('independent_middleware', [True, False])
-    @staticmethod
-    def test_generate_trans_id_and_time_with_request(independent_middleware, asgi):
+    def test_generate_trans_id_and_time_with_request(self, independent_middleware, asgi):
         # NOTE(kgriffs): We test both so that we can cover the code paths
         # where only a single middleware method is implemented by a
         # component.
@@ -335,8 +317,7 @@ class TestSeveralMiddlewares(TestMiddleware):
         assert context['end_time'] >= context['start_time'], \
             'process_response not executed after request'
 
-    @staticmethod
-    def test_legacy_middleware_called_with_correct_args(asgi):
+    def test_legacy_middleware_called_with_correct_args(self, asgi):
         global context
         app = create_app(asgi, middleware=[ExecutedFirstMiddleware()])
         app.add_route(TEST_ROUTE, MiddlewareClassResource())
@@ -347,8 +328,7 @@ class TestSeveralMiddlewares(TestMiddleware):
         assert isinstance(context['resp'], falcon.Response)
         assert isinstance(context['resource'], MiddlewareClassResource)
 
-    @staticmethod
-    def test_middleware_execution_order(asgi):
+    def test_middleware_execution_order(self, asgi):
         global context
         app = create_app(asgi, independent_middleware=False,
                          middleware=[ExecutedFirstMiddleware(),
@@ -372,8 +352,7 @@ class TestSeveralMiddlewares(TestMiddleware):
         ]
         assert expectedExecutedMethods == context['executed_methods']
 
-    @staticmethod
-    def test_independent_middleware_execution_order(asgi):
+    def test_independent_middleware_execution_order(self, asgi):
         global context
         app = create_app(asgi, independent_middleware=True,
                          middleware=[ExecutedFirstMiddleware(),
@@ -397,26 +376,22 @@ class TestSeveralMiddlewares(TestMiddleware):
         ]
         assert expectedExecutedMethods == context['executed_methods']
 
-    @staticmethod
-    def test_multiple_reponse_mw_throw_exception(asgi):
+    def test_multiple_reponse_mw_throw_exception(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         context['req_succeeded'] = []
 
         class RaiseStatusMiddleware:
-            @staticmethod
-            def process_response(req, resp, resource, req_succeeded):
+            def process_response(self, req, resp, resource, req_succeeded):
                 raise falcon.HTTPStatus(falcon.HTTP_201)
 
         class RaiseErrorMiddleware:
-            @staticmethod
-            def process_response(req, resp, resource, req_succeeded):
+            def process_response(self, req, resp, resource, req_succeeded):
                 raise falcon.HTTPError(falcon.HTTP_748)
 
         class ProcessResponseMiddleware:
-            @staticmethod
-            def process_response(req, resp, resource, req_succeeded):
+            def process_response(self, req, resp, resource, req_succeeded):
                 context['executed_methods'].append('process_response')
                 context['req_succeeded'].append(req_succeeded)
 
@@ -437,8 +412,7 @@ class TestSeveralMiddlewares(TestMiddleware):
         assert context['executed_methods'] == expected_methods
         assert context['req_succeeded'] == [True, False, False]
 
-    @staticmethod
-    def test_inner_mw_throw_exception(asgi):
+    def test_inner_mw_throw_exception(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
@@ -447,8 +421,7 @@ class TestSeveralMiddlewares(TestMiddleware):
 
         class RaiseErrorMiddleware:
 
-            @staticmethod
-            def process_request(req, resp):
+            def process_request(self, req, resp):
                 raise MyException('Always fail')
 
         app = create_app(asgi, middleware=[TransactionIdMiddleware(),
@@ -480,8 +453,7 @@ class TestSeveralMiddlewares(TestMiddleware):
         #   middleware methods.
         assert 'end_time' not in context
 
-    @staticmethod
-    def test_inner_mw_throw_exception_while_processing_resp(asgi):
+    def test_inner_mw_throw_exception_while_processing_resp(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
@@ -490,8 +462,7 @@ class TestSeveralMiddlewares(TestMiddleware):
 
         class RaiseErrorMiddleware:
 
-            @staticmethod
-            def process_response(req, resp, resource, req_succeeded):
+            def process_response(self, req, resp, resource, req_succeeded):
                 raise MyException('Always fail')
 
         app = create_app(asgi, middleware=[TransactionIdMiddleware(),
@@ -523,15 +494,13 @@ class TestSeveralMiddlewares(TestMiddleware):
         #   middleware methods.
         assert 'end_time' not in context
 
-    @staticmethod
-    def test_inner_mw_with_ex_handler_throw_exception(asgi):
+    def test_inner_mw_with_ex_handler_throw_exception(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
 
-            @staticmethod
-            def process_request(req, resp, resource):
+            def process_request(self, req, resp, resource):
                 raise Exception('Always fail')
 
         app = create_app(asgi, middleware=[TransactionIdMiddleware(),
@@ -555,15 +524,13 @@ class TestSeveralMiddlewares(TestMiddleware):
         assert 'end_time' in context
         assert 'error_handler' in context
 
-    @staticmethod
-    def test_outer_mw_with_ex_handler_throw_exception(asgi):
+    def test_outer_mw_with_ex_handler_throw_exception(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
 
-            @staticmethod
-            def process_request(req, resp):
+            def process_request(self, req, resp):
                 raise Exception('Always fail')
 
         app = create_app(asgi, middleware=[TransactionIdMiddleware(),
@@ -587,15 +554,13 @@ class TestSeveralMiddlewares(TestMiddleware):
         assert 'end_time' in context
         assert 'error_handler' in context
 
-    @staticmethod
-    def test_order_mw_executed_when_exception_in_resp(asgi):
+    def test_order_mw_executed_when_exception_in_resp(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
 
-            @staticmethod
-            def process_response(req, resp, resource):
+            def process_response(self, req, resp, resource):
                 raise Exception('Always fail')
 
         app = create_app(asgi, middleware=[ExecutedFirstMiddleware(),
@@ -623,15 +588,13 @@ class TestSeveralMiddlewares(TestMiddleware):
         ]
         assert expectedExecutedMethods == context['executed_methods']
 
-    @staticmethod
-    def test_order_independent_mw_executed_when_exception_in_resp(asgi):
+    def test_order_independent_mw_executed_when_exception_in_resp(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
 
-            @staticmethod
-            def process_response(req, resp, resource):
+            def process_response(self, req, resp, resource):
                 raise Exception('Always fail')
 
         app = create_app(asgi, independent_middleware=True,
@@ -660,14 +623,12 @@ class TestSeveralMiddlewares(TestMiddleware):
         ]
         assert expectedExecutedMethods == context['executed_methods']
 
-    @staticmethod
-    def test_order_mw_executed_when_exception_in_req(asgi):
+    def test_order_mw_executed_when_exception_in_req(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
-            @staticmethod
-            def process_request(req, resp):
+            def process_request(self, req, resp):
                 raise Exception('Always fail')
 
         class RaiseErrorMiddlewareAsync:
@@ -698,14 +659,12 @@ class TestSeveralMiddlewares(TestMiddleware):
         ]
         assert expectedExecutedMethods == context['executed_methods']
 
-    @staticmethod
-    def test_order_independent_mw_executed_when_exception_in_req(asgi):
+    def test_order_independent_mw_executed_when_exception_in_req(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
-            @staticmethod
-            def process_request(req, resp):
+            def process_request(self, req, resp):
                 raise Exception('Always fail')
 
         class RaiseErrorMiddlewareAsync:
@@ -737,14 +696,12 @@ class TestSeveralMiddlewares(TestMiddleware):
         ]
         assert expectedExecutedMethods == context['executed_methods']
 
-    @staticmethod
-    def test_order_mw_executed_when_exception_in_rsrc(asgi):
+    def test_order_mw_executed_when_exception_in_rsrc(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
-            @staticmethod
-            def process_resource(req, resp, resource):
+            def process_resource(self, req, resp, resource):
                 raise Exception('Always fail')
 
         class RaiseErrorMiddlewareAsync:
@@ -779,14 +736,12 @@ class TestSeveralMiddlewares(TestMiddleware):
         ]
         assert expectedExecutedMethods == context['executed_methods']
 
-    @staticmethod
-    def test_order_independent_mw_executed_when_exception_in_rsrc(asgi):
+    def test_order_independent_mw_executed_when_exception_in_rsrc(self, asgi):
         """Test that error in inner middleware leaves"""
         global context
 
         class RaiseErrorMiddleware:
-            @staticmethod
-            def process_resource(req, resp, resource):
+            def process_resource(self, req, resp, resource):
                 raise Exception('Always fail')
 
         class RaiseErrorMiddlewareAsync:
@@ -822,8 +777,7 @@ class TestSeveralMiddlewares(TestMiddleware):
 
 
 class TestRemoveBasePathMiddleware(TestMiddleware):
-    @staticmethod
-    def test_base_path_is_removed_before_routing(asgi):
+    def test_base_path_is_removed_before_routing(self, asgi):
         """Test that RemoveBasePathMiddleware is executed before routing"""
         app = create_app(asgi, middleware=RemoveBasePathMiddleware())
 
@@ -841,14 +795,12 @@ class TestRemoveBasePathMiddleware(TestMiddleware):
 class TestResourceMiddleware(TestMiddleware):
 
     @pytest.mark.parametrize('independent_middleware', [True, False])
-    @staticmethod
-    def test_can_access_resource_params(asgi, independent_middleware):
+    def test_can_access_resource_params(self, asgi, independent_middleware):
         """Test that params can be accessed from within process_resource"""
         global context
 
         class Resource:
-            @staticmethod
-            def on_get(req, resp, **params):
+            def on_get(self, req, resp, **params):
                 resp.body = json.dumps(params)
 
         app = create_app(asgi, middleware=AccessParamsMiddleware(),
@@ -864,8 +816,7 @@ class TestResourceMiddleware(TestMiddleware):
 
 
 class TestEmptySignatureMiddleware(TestMiddleware):
-    @staticmethod
-    def test_dont_need_params_in_signature(asgi):
+    def test_dont_need_params_in_signature(self, asgi):
         """
         Verify that we don't need parameters in the process_* signatures (for
         side-effect-only middlewares, mostly). Makes no difference on py27
@@ -877,8 +828,7 @@ class TestEmptySignatureMiddleware(TestMiddleware):
 
 
 class TestErrorHandling(TestMiddleware):
-    @staticmethod
-    def test_error_composed_before_resp_middleware_called(asgi):
+    def test_error_composed_before_resp_middleware_called(self, asgi):
         mw = CaptureResponseMiddleware()
         app = create_app(asgi, middleware=mw)
         app.add_route('/', MiddlewareClassResource())
@@ -898,8 +848,7 @@ class TestErrorHandling(TestMiddleware):
         assert isinstance(mw.req, falcon.Request)
         assert isinstance(mw.resource, MiddlewareClassResource)
 
-    @staticmethod
-    def test_http_status_raised_from_error_handler(asgi):
+    def test_http_status_raised_from_error_handler(self, asgi):
         mw = CaptureResponseMiddleware()
         app = create_app(asgi, middleware=mw)
         app.add_route('/', MiddlewareClassResource())
@@ -925,9 +874,10 @@ class TestErrorHandling(TestMiddleware):
 
 
 class TestShortCircuiting(TestMiddleware):
+    def setup_method(self, method):
+        super(TestShortCircuiting, self).setup_method(method)
 
-    @staticmethod
-    def _make_client(asgi, independent_middleware=True):
+    def _make_client(self, asgi, independent_middleware=True):
         mw = [
             RequestTimeMiddleware(),
             ResponseCacheMiddlware(),

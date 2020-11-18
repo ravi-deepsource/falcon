@@ -10,12 +10,10 @@ import falcon
 
 class StorageEngine:
 
-    @staticmethod
-    def get_things(marker, limit):
+    def get_things(self, marker, limit):
         return [{'id': str(uuid.uuid4()), 'color': 'green'}]
 
-    @staticmethod
-    def add_thing(thing):
+    def add_thing(self, thing):
         thing['id'] = str(uuid.uuid4())
         return thing
 
@@ -71,15 +69,13 @@ class AuthMiddleware:
                                           challenges=challenges,
                                           href='http://docs.example.com/auth')
 
-    @staticmethod
-    def _token_is_valid(token, account_id):
+    def _token_is_valid(self, token, account_id):
         return True  # Suuuuuure it's valid...
 
 
 class RequireJSON:
 
-    @staticmethod
-    def process_request(req, resp):
+    def process_request(self, req, resp):
         if not req.client_accepts_json:
             raise falcon.HTTPNotAcceptable(
                 title='406 Not Acceptable',
@@ -96,8 +92,7 @@ class RequireJSON:
 
 class JSONTranslator:
 
-    @staticmethod
-    def process_request(req, resp):
+    def process_request(self, req, resp):
         # req.stream corresponds to the WSGI wsgi.input environ variable,
         # and allows you to read bytes from the request body.
         #
@@ -122,8 +117,7 @@ class JSONTranslator:
             raise falcon.HTTPBadRequest(title='Malformed JSON',
                                         description=description)
 
-    @staticmethod
-    def process_response(req, resp, resource, req_succeeded):
+    def process_response(self, req, resp, resource, req_succeeded):
         if not hasattr(resp.context, 'result'):
             return
 

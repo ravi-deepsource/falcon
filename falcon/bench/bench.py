@@ -124,8 +124,7 @@ def determine_iterations(func):
         )
 
         if total_sec >= ITER_DETECTION_DURATION_MIN:
-            if total_sec >= ITER_DETECTION_DURATION_MAX:
-                raise AssertionError
+            assert total_sec < ITER_DETECTION_DURATION_MAX
             break
 
         iterations *= ITER_DETECTION_MULTIPLIER
@@ -227,17 +226,16 @@ def create_bench(name, env):
 
     def bench():
         app(env, srmock)
-        if srmock.status != '200 OK':
-            raise AssertionError
+        assert srmock.status == '200 OK'
 
     def bench_generator():
         exhaust(app(env, srmock))
-        if srmock.status != '200 OK':
-            raise AssertionError
+        assert srmock.status == '200 OK'
 
     if inspect.isgeneratorfunction(app):
         return bench_generator
-    return bench
+    else:
+        return bench
 
 
 def consolidate_datasets(datasets):

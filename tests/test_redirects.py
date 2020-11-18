@@ -31,24 +31,19 @@ class RedirectingResource:
     # http methods with these types of redirects; this is only
     # done to simplify testing.
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMovedPermanently('/moved/perm')
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         raise falcon.HTTPFound('/found')
 
-    @staticmethod
-    def on_put(req, resp):
+    def on_put(self, req, resp):
         raise falcon.HTTPSeeOther('/see/other')
 
-    @staticmethod
-    def on_delete(req, resp):
+    def on_delete(self, req, resp):
         raise falcon.HTTPTemporaryRedirect('/tmp/redirect')
 
-    @staticmethod
-    def on_head(req, resp):
+    def on_head(self, req, resp):
         raise falcon.HTTPPermanentRedirect('/perm/redirect')
 
 
@@ -57,24 +52,19 @@ class RedirectingResourceWithHeaders:
     # http methods with these types of redirects; this is only
     # done to simplify testing.
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMovedPermanently('/moved/perm', headers={'foo': 'bar'})
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         raise falcon.HTTPFound('/found', headers={'foo': 'bar'})
 
-    @staticmethod
-    def on_put(req, resp):
+    def on_put(self, req, resp):
         raise falcon.HTTPSeeOther('/see/other', headers={'foo': 'bar'})
 
-    @staticmethod
-    def on_delete(req, resp):
+    def on_delete(self, req, resp):
         raise falcon.HTTPTemporaryRedirect('/tmp/redirect', headers={'foo': 'bar'})
 
-    @staticmethod
-    def on_head(req, resp):
+    def on_head(self, req, resp):
         raise falcon.HTTPPermanentRedirect('/perm/redirect', headers={'foo': 'bar'})
 
 

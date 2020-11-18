@@ -171,7 +171,9 @@ class WrappedClassResource:
 
 
 class WrappedClassResourceChild(WrappedClassResource):
-    pass
+    def on_head(self, req, resp):
+        # Test passing no extra args
+        super(WrappedClassResourceChild, self).on_head(req, resp)
 
 
 class ClassResourceWithURIFields:
@@ -393,21 +395,18 @@ class HandGame:
         resp.text = 'Responder called.'
 
     @falcon.after(_game_hook)
-    @staticmethod
-    def on_get_once(req, resp):
+    def on_get_once(self, req, resp):
         resp.text = 'Responder called.'
 
     @falcon.after(_game_hook)
     @falcon.after(_game_hook)
-    @staticmethod
-    def on_get_twice(req, resp):
+    def on_get_twice(self, req, resp):
         resp.text = 'Responder called.'
 
     @falcon.after(_game_hook)
     @falcon.after(_game_hook)
     @falcon.after(_game_hook)
-    @staticmethod
-    def on_get_thrice(req, resp):
+    def on_get_thrice(self, req, resp):
         resp.text = 'Responder called.'
 
 

@@ -27,8 +27,7 @@ def falcon(body, headers):
 
     # @falcon.before(ask)
     class HelloResource:
-        @staticmethod
-        def on_get(req, resp, account_id):
+        def on_get(self, req, resp, account_id):
             user_agent = req.user_agent  # NOQA
             limit = req.get_param('limit') or '10'  # NOQA
             resp.data = body

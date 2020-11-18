@@ -7,25 +7,21 @@ from falcon import routing
 class TestUriTemplates:
 
     @pytest.mark.parametrize('value', (42, falcon.App))
-    @staticmethod
-    def test_string_type_required(value):
+    def test_string_type_required(self, value):
         with pytest.raises(TypeError):
             routing.compile_uri_template(value)
 
     @pytest.mark.parametrize('value', ('this', 'this/that'))
-    @staticmethod
-    def test_template_must_start_with_slash(value):
+    def test_template_must_start_with_slash(self, value):
         with pytest.raises(ValueError):
             routing.compile_uri_template(value)
 
     @pytest.mark.parametrize('value', ('//', 'a//', '//b', 'a//b', 'a/b//', 'a/b//c'))
-    @staticmethod
-    def test_template_may_not_contain_double_slash(value):
+    def test_template_may_not_contain_double_slash(self, value):
         with pytest.raises(ValueError):
             routing.compile_uri_template(value)
 
-    @staticmethod
-    def test_root():
+    def test_root(self):
         fields, pattern = routing.compile_uri_template('/')
         assert not fields
         assert not pattern.match('/x')
@@ -35,8 +31,7 @@ class TestUriTemplates:
         assert not result.groupdict()
 
     @pytest.mark.parametrize('path', ('/hello', '/hello/world', '/hi/there/how/are/you'))
-    @staticmethod
-    def test_no_fields(path):
+    def test_no_fields(self, path):
         fields, pattern = routing.compile_uri_template(path)
         assert not fields
         assert not pattern.match(path[:-1])
@@ -45,8 +40,7 @@ class TestUriTemplates:
         assert result
         assert not result.groupdict()
 
-    @staticmethod
-    def test_one_field():
+    def test_one_field(self):
         fields, pattern = routing.compile_uri_template('/{name}')
         assert fields == {'name'}
 
@@ -72,8 +66,7 @@ class TestUriTemplates:
         assert result
         assert result.groupdict() == {'name': 'Kelsier'}
 
-    @staticmethod
-    def test_one_field_with_digits():
+    def test_one_field_with_digits(self):
         fields, pattern = routing.compile_uri_template('/{name123}')
         assert fields == {'name123'}
 
@@ -81,8 +74,7 @@ class TestUriTemplates:
         assert result
         assert result.groupdict() == {'name123': 'Kelsier'}
 
-    @staticmethod
-    def test_one_field_with_prefixed_digits():
+    def test_one_field_with_prefixed_digits(self):
         fields, pattern = routing.compile_uri_template('/{37signals}')
         assert fields == set()
 
@@ -90,8 +82,7 @@ class TestUriTemplates:
         assert not result
 
     @pytest.mark.parametrize('postfix', ('', '/'))
-    @staticmethod
-    def test_two_fields(postfix):
+    def test_two_fields(self, postfix):
         path = '/book/{book_id}/characters/{n4m3}' + postfix
         fields, pattern = routing.compile_uri_template(path)
         assert fields == {'n4m3', 'book_id'}
@@ -100,8 +91,7 @@ class TestUriTemplates:
         assert result
         assert result.groupdict() == {'n4m3': 'Vin', 'book_id': '0765350386'}
 
-    @staticmethod
-    def test_three_fields():
+    def test_three_fields(self):
         fields, pattern = routing.compile_uri_template('/{a}/{b}/x/{c}')
         assert fields == set('abc')
 
@@ -109,8 +99,7 @@ class TestUriTemplates:
         assert result
         assert result.groupdict() == {'a': 'one', 'b': '2', 'c': '3'}
 
-    @staticmethod
-    def test_malformed_field():
+    def test_malformed_field(self):
         fields, pattern = routing.compile_uri_template('/{a}/{1b}/x/{c}')
         assert fields == set('ac')
 

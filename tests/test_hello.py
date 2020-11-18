@@ -111,13 +111,11 @@ class NoStatusResource:
 
 class TestHelloWorld:
 
-    @staticmethod
-    def test_env_headers_list_of_tuples():
+    def test_env_headers_list_of_tuples(self):
         env = testing.create_environ(headers=[('User-Agent', 'Falcon-Test')])
         assert env['HTTP_USER_AGENT'] == 'Falcon-Test'
 
-    @staticmethod
-    def test_root_route(client):
+    def test_root_route(self, client):
         doc = {'message': 'Hello world!'}
         resource = testing.SimpleTestResource(json=doc)
         client.app.add_route('/', resource)
@@ -125,8 +123,7 @@ class TestHelloWorld:
         result = client.simulate_get()
         assert result.json == doc
 
-    @staticmethod
-    def test_no_route(client):
+    def test_no_route(self, client):
         result = client.simulate_get('/seenoevil')
         assert result.status_code == 404
 
@@ -149,8 +146,7 @@ class TestHelloWorld:
         assert get_body(resp) == resource.sample_utf8
         assert result.content == resource.sample_utf8
 
-    @staticmethod
-    def test_no_body_on_head(client):
+    def test_no_body_on_head(self, client):
         resource = HelloResource('body')
         client.app.add_route('/body', resource)
         result = client.simulate_head('/body')
@@ -160,8 +156,7 @@ class TestHelloWorld:
         assert resource.called
         assert result.headers['content-length'] == str(len(HelloResource.sample_utf8))
 
-    @staticmethod
-    def test_stream_chunked(client):
+    def test_stream_chunked(self, client):
         resource = HelloResource('stream')
         client.app.add_route('/chunked-stream', resource)
 
@@ -170,8 +165,7 @@ class TestHelloWorld:
         assert result.content == resource.sample_utf8
         assert 'content-length' not in result.headers
 
-    @staticmethod
-    def test_stream_known_len(client):
+    def test_stream_known_len(self, client):
         resource = HelloResource('stream, stream_len')
         client.app.add_route('/stream', resource)
 
@@ -184,8 +178,7 @@ class TestHelloWorld:
         assert len(result.content) == expected_len
         assert result.content == resource.sample_utf8
 
-    @staticmethod
-    def test_filelike(client):
+    def test_filelike(self, client):
         resource = HelloResource('stream, stream_len, filelike')
         client.app.add_route('/filelike', resource)
 
@@ -226,8 +219,7 @@ class TestHelloWorld:
         if assert_closed:
             assert resource.stream.close_called
 
-    @staticmethod
-    def test_filelike_using_helper(client):
+    def test_filelike_using_helper(self, client):
         resource = HelloResource('stream, stream_len, filelike, use_helper')
         client.app.add_route('/filelike-helper', resource)
 
@@ -239,8 +231,7 @@ class TestHelloWorld:
         assert actual_len == expected_len
         assert len(result.content) == expected_len
 
-    @staticmethod
-    def test_status_not_set(client):
+    def test_status_not_set(self, client):
         client.app.add_route('/nostatus', NoStatusResource())
 
         result = client.simulate_get('/nostatus')

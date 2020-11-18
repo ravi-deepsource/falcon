@@ -31,19 +31,16 @@ GMT_PLUS_ONE = TimezoneGMTPlus1()
 
 class CookieResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         resp.set_cookie('foo', 'bar', domain='example.com', path='/')
 
-    @staticmethod
-    def on_head(req, resp):
+    def on_head(self, req, resp):
         resp.set_cookie('foo', 'bar', max_age=300)
         resp.set_cookie('bar', 'baz', http_only=False)
         resp.set_cookie('bad', 'cookie')
         resp.unset_cookie('bad')
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         e = datetime(year=2050, month=1, day=1)  # naive
         resp.set_cookie('foo', 'bar',
                         http_only=False,
@@ -51,8 +48,7 @@ class CookieResource:
                         expires=e)
         resp.unset_cookie('bad')
 
-    @staticmethod
-    def on_put(req, resp):
+    def on_put(self, req, resp):
         e = datetime(year=2050, month=1, day=1, tzinfo=GMT_PLUS_ONE)  # aware
         resp.set_cookie('foo', 'bar', http_only=False, secure=False, expires=e)
         resp.unset_cookie('bad')
@@ -60,8 +56,7 @@ class CookieResource:
 
 class CookieResourceMaxAgeFloatString:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         resp.set_cookie(
             'foofloat', 'bar', max_age=15.3, secure=False, http_only=False)
         resp.set_cookie(
@@ -69,26 +64,21 @@ class CookieResourceMaxAgeFloatString:
 
 
 class CookieResourceSameSite:
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         resp.set_cookie('foo', 'bar', same_site='Lax')
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         resp.set_cookie('bar', 'foo', same_site='STRICT')
 
-    @staticmethod
-    def on_put(req, resp):
+    def on_put(self, req, resp):
         resp.set_cookie('baz', 'foo', same_site='none')
 
-    @staticmethod
-    def on_delete(req, resp):
+    def on_delete(self, req, resp):
         resp.set_cookie('baz', 'foo', same_site='')
 
 
 class CookieUnset:
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         resp.unset_cookie('foo')
         resp.unset_cookie('bar', path='/bar')
         resp.unset_cookie('baz', domain='www.example.com')

@@ -30,27 +30,23 @@ _REQUEST_TIMEOUT = 10
 
 class TestASGIServer:
 
-    @staticmethod
-    def test_get(server_base_url):
+    def test_get(self, server_base_url):
         resp = requests.get(server_base_url, timeout=_REQUEST_TIMEOUT)
         assert resp.status_code == 200
         assert resp.text == '127.0.0.1'
 
-    @staticmethod
-    def test_put(server_base_url):
+    def test_put(self, server_base_url):
         body = '{}'
         resp = requests.put(server_base_url, data=body, timeout=_REQUEST_TIMEOUT)
         assert resp.status_code == 200
         assert resp.text == '{}'
 
-    @staticmethod
-    def test_head_405(server_base_url):
+    def test_head_405(self, server_base_url):
         body = '{}'
         resp = requests.head(server_base_url, data=body, timeout=_REQUEST_TIMEOUT)
         assert resp.status_code == 405
 
-    @staticmethod
-    def test_post_multipart_form(server_base_url):
+    def test_post_multipart_form(self, server_base_url):
         size = random.randint(16 * _SIZE_1_MB, 32 * _SIZE_1_MB)
         data = os.urandom(size)
         digest = hashlib.sha1(data).hexdigest()
@@ -73,8 +69,7 @@ class TestASGIServer:
             },
         }
 
-    @staticmethod
-    def test_post_multiple(server_base_url):
+    def test_post_multiple(self, server_base_url):
         body = testing.rand_string(_SIZE_1_KB / 2, _SIZE_1_KB)
         resp = requests.post(server_base_url, data=body, timeout=_REQUEST_TIMEOUT)
         assert resp.status_code == 200
@@ -86,8 +81,7 @@ class TestASGIServer:
         resp = requests.post(server_base_url, data=body, timeout=_REQUEST_TIMEOUT)
         assert resp.headers['X-Counter'] == '2002'
 
-    @staticmethod
-    def test_post_invalid_content_length(server_base_url):
+    def test_post_invalid_content_length(self, server_base_url):
         headers = {'Content-Length': 'invalid'}
 
         try:
@@ -104,20 +98,17 @@ class TestASGIServer:
             #   get a heads-up if the request is no longer blocked.
             pass
 
-    @staticmethod
-    def test_post_read_bounded_stream(server_base_url):
+    def test_post_read_bounded_stream(self, server_base_url):
         body = testing.rand_string(_SIZE_1_KB / 2, _SIZE_1_KB)
         resp = requests.post(server_base_url + 'bucket', data=body, timeout=_REQUEST_TIMEOUT)
         assert resp.status_code == 200
         assert resp.text == body
 
-    @staticmethod
-    def test_post_read_bounded_stream_no_body(server_base_url):
+    def test_post_read_bounded_stream_no_body(self, server_base_url):
         resp = requests.post(server_base_url + 'bucket', timeout=_REQUEST_TIMEOUT)
         assert not resp.text
 
-    @staticmethod
-    def test_sse(server_base_url):
+    def test_sse(self, server_base_url):
         resp = requests.get(server_base_url + 'events', timeout=_REQUEST_TIMEOUT)
         assert resp.status_code == 200
 
@@ -128,8 +119,7 @@ class TestASGIServer:
 
         assert not events[-1]
 
-    @staticmethod
-    def test_sse_client_disconnects_early(server_base_url):
+    def test_sse_client_disconnects_early(self, server_base_url):
         """Test that when the client connection is lost, the server task does not hang.
 
         In the case of SSE, Falcon should detect when the client connection is

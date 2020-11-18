@@ -38,16 +38,13 @@ class CustomException(CustomBaseException):
 
 class ErroredClassResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise Exception('Plain Exception')
 
-    @staticmethod
-    def on_head(req, resp):
+    def on_head(self, req, resp):
         raise CustomBaseException('CustomBaseException')
 
-    @staticmethod
-    def on_delete(req, resp):
+    def on_delete(self, req, resp):
         raise CustomException('CustomException')
 
 
@@ -60,8 +57,7 @@ def client(asgi):
 
 class TestErrorHandler:
 
-    @staticmethod
-    def test_caught_error(client):
+    def test_caught_error(self, client):
         client.app.add_error_handler(Exception, capture_error)
 
         result = client.simulate_get()
@@ -83,8 +79,7 @@ class TestErrorHandler:
         assert result.headers['content-type'] == resp_content_type
         assert result.text.startswith(resp_start)
 
-    @staticmethod
-    def test_caught_error_async(asgi):
+    def test_caught_error_async(self, asgi):
         if not asgi:
             pytest.skip('Test only applies to ASGI')
 
@@ -105,50 +100,43 @@ class TestErrorHandler:
         assert result.status_code == 723
         assert not result.content
 
-    @staticmethod
-    def test_uncaught_error(client):
+    def test_uncaught_error(self, client):
         client.app._error_handlers.clear()
         client.app.add_error_handler(CustomException, capture_error)
         with pytest.raises(Exception):
             client.simulate_get()
 
-    @staticmethod
-    def test_uncaught_error_else(client):
+    def test_uncaught_error_else(self, client):
         client.app._error_handlers.clear()
         with pytest.raises(Exception):
             client.simulate_get()
 
-    @staticmethod
-    def test_converted_error(client):
+    def test_converted_error(self, client):
         client.app.add_error_handler(CustomException)
 
         result = client.simulate_delete()
         assert result.status_code == 792
         assert result.json['title'] == 'Internet crashed!'
 
-    @staticmethod
-    def test_handle_not_defined(client):
+    def test_handle_not_defined(self, client):
         with pytest.raises(AttributeError):
             client.app.add_error_handler(CustomBaseException)
 
-    @staticmethod
-    def test_subclass_error(client):
+    def test_subclass_error(self, client):
         client.app.add_error_handler(CustomBaseException, capture_error)
 
         result = client.simulate_delete()
         assert result.status_code == 723
         assert result.text == 'error: CustomException'
 
-    @staticmethod
-    def test_error_precedence_duplicate(client):
+    def test_error_precedence_duplicate(self, client):
         client.app.add_error_handler(Exception, capture_error)
         client.app.add_error_handler(Exception, handle_error_first)
 
         result = client.simulate_get()
         assert result.text == 'first error handler'
 
-    @staticmethod
-    def test_error_precedence_subclass(client):
+    def test_error_precedence_subclass(self, client):
         client.app.add_error_handler(Exception, capture_error)
         client.app.add_error_handler(CustomException, handle_error_first)
 
@@ -160,8 +148,7 @@ class TestErrorHandler:
         assert result.status_code == 723
         assert result.text == 'error: Plain Exception'
 
-    @staticmethod
-    def test_error_precedence_subclass_order_indifference(client):
+    def test_error_precedence_subclass_order_indifference(self, client):
         client.app.add_error_handler(CustomException, handle_error_first)
         client.app.add_error_handler(Exception, capture_error)
 
@@ -182,8 +169,7 @@ class TestErrorHandler:
         result = client.simulate_delete()
         assert result.status_code == 723
 
-    @staticmethod
-    def test_handler_single_exception_iterable(client):
+    def test_handler_single_exception_iterable(self, client):
         def exception_list_generator():
             yield CustomException
 
@@ -202,8 +188,7 @@ class TestErrorHandler:
         with pytest.raises(TypeError):
             client.app.add_error_handler(exceptions, capture_error)
 
-    @staticmethod
-    def test_handler_signature_shim():
+    def test_handler_signature_shim(self):
         def check_args(ex, req, resp):
             assert isinstance(ex, BaseException)
             assert isinstance(req, falcon.Request)
@@ -230,8 +215,7 @@ class TestErrorHandler:
         client.simulate_get()
         client.simulate_head()
 
-    @staticmethod
-    def test_handler_must_be_coroutine_for_asgi():
+    def test_handler_must_be_coroutine_for_asgi(self):
         async def legacy_handler(err, rq, rs, prms):
             pass
 
@@ -241,11 +225,9 @@ class TestErrorHandler:
             with pytest.raises(ValueError):
                 app.add_error_handler(Exception, capture_error)
 
-    @staticmethod
-    def test_catch_http_no_route_error(asgi):
+    def test_catch_http_no_route_error(self, asgi):
         class Resource:
-            @staticmethod
-            def on_get(req, resp):
+            def on_get(self, req, resp):
                 raise falcon.HTTPNotFound()
 
         def capture_error(req, resp, ex, params):
@@ -268,26 +250,22 @@ class TestErrorHandler:
 
 
 class NoBodyResource:
-    @staticmethod
-    def on_get(req, res):
+    def on_get(self, req, res):
         res.data = b'foo'
         raise falcon.HTTPError(falcon.HTTP_IM_A_TEAPOT)
 
-    @staticmethod
-    def on_post(req, res):
+    def on_post(self, req, res):
         res.media = {'a': 1}
         raise falcon.HTTPError(falcon.HTTP_740)
 
-    @staticmethod
-    def on_put(req, res):
+    def on_put(self, req, res):
         res.body = 'foo'
         raise falcon.HTTPError(falcon.HTTP_701)
 
 
 class TestNoBodyWithStatus:
     @pytest.fixture()
-    @staticmethod
-    def body_client(asgi):
+    def body_client(self, asgi):
         app = create_app(asgi=asgi)
         app.add_route('/error', NoBodyResource())
 
@@ -297,46 +275,39 @@ class TestNoBodyWithStatus:
         app.set_error_serializer(no_reps)
         return testing.TestClient(app)
 
-    @staticmethod
-    def test_data_is_set(body_client):
+    def test_data_is_set(self, body_client):
         res = body_client.simulate_get('/error')
         assert res.status == falcon.HTTP_IM_A_TEAPOT
         assert res.content == b''
 
-    @staticmethod
-    def test_media_is_set(body_client):
+    def test_media_is_set(self, body_client):
         res = body_client.simulate_post('/error')
         assert res.status == falcon.HTTP_740
         assert res.content == b''
 
-    @staticmethod
-    def test_body_is_set(body_client):
+    def test_body_is_set(self, body_client):
         res = body_client.simulate_put('/error')
         assert res.status == falcon.HTTP_701
         assert res.content == b''
 
 
 class CustomErrorResource:
-    @staticmethod
-    def on_get(req, res):
+    def on_get(self, req, res):
         res.data = b'foo'
         raise ZeroDivisionError()
 
-    @staticmethod
-    def on_post(req, res):
+    def on_post(self, req, res):
         res.media = {'a': 1}
         raise ZeroDivisionError()
 
-    @staticmethod
-    def on_put(req, res):
+    def on_put(self, req, res):
         res.body = 'foo'
         raise ZeroDivisionError()
 
 
 class TestCustomError:
     @pytest.fixture()
-    @staticmethod
-    def body_client(asgi):
+    def body_client(self, asgi):
         app = create_app(asgi=asgi)
         app.add_route('/error', CustomErrorResource())
 
@@ -352,20 +323,17 @@ class TestCustomError:
         app.add_error_handler(ZeroDivisionError, handle_zero_division)
         return testing.TestClient(app)
 
-    @staticmethod
-    def test_data_is_set(body_client):
+    def test_data_is_set(self, body_client):
         res = body_client.simulate_get('/error')
         assert res.status == falcon.HTTP_719
         assert res.content == b''
 
-    @staticmethod
-    def test_media_is_set(body_client):
+    def test_media_is_set(self, body_client):
         res = body_client.simulate_post('/error')
         assert res.status == falcon.HTTP_719
         assert res.content == b''
 
-    @staticmethod
-    def test_body_is_set(body_client):
+    def test_body_is_set(self, body_client):
         res = body_client.simulate_put('/error')
         assert res.status == falcon.HTTP_719
         assert res.content == b''

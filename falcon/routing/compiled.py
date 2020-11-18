@@ -114,8 +114,7 @@ class CompiledRouter:
         self.find('/')
         return self._finder_src
 
-    @staticmethod
-    def map_http_methods(resource, **kwargs):
+    def map_http_methods(self, resource, **kwargs):
         """Map HTTP methods (e.g., GET, POST) to methods of a resource object.
 
         This method is called from :meth:`~.add_route` and may be overridden to
@@ -275,14 +274,14 @@ class CompiledRouter:
 
         if node is not None:
             return node.resource, node.method_map, params, node.uri_template
-        return None
+        else:
+            return None
 
     # -----------------------------------------------------------------
     # Private
     # -----------------------------------------------------------------
 
-    @staticmethod
-    def _require_coroutine_responders(method_map):
+    def _require_coroutine_responders(self, method_map):
         for method, responder in method_map.items():
             # NOTE(kgriffs): We don't simply wrap non-async functions
             #   since they likely peform relatively long blocking
@@ -305,8 +304,7 @@ class CompiledRouter:
                     msg = msg.format(responder)
                     raise TypeError(msg)
 
-    @staticmethod
-    def _require_non_coroutine_responders(method_map):
+    def _require_non_coroutine_responders(self, method_map):
         for method, responder in method_map.items():
             # NOTE(kgriffs): We don't simply wrap non-async functions
             #   since they likely peform relatively long blocking
@@ -429,8 +427,7 @@ class CompiledRouter:
                     # segment as the value for the param.
 
                     if node.var_converter_map:
-                        if len(node.var_converter_map) != 1:
-                            raise AssertionError
+                        assert len(node.var_converter_map) == 1
 
                         parent.append_child(_CxSetFragmentFromPath(level))
 
@@ -461,9 +458,8 @@ class CompiledRouter:
                     #   /foo/{id}/bar
                     #   /foo/{name}/bar
                     #
-                    if len([_node for _node in nodes
-                                if _node.is_var and not _node.is_complex]) != 1:
-                        raise AssertionError
+                    assert len([_node for _node in nodes
+                                if _node.is_var and not _node.is_complex]) == 1
                     found_simple = True
 
             else:
@@ -574,8 +570,7 @@ class CompiledRouter:
 
         return scope['find']
 
-    @staticmethod
-    def _instantiate_converter(klass, argstr=None):
+    def _instantiate_converter(self, klass, argstr=None):
         if argstr is None:
             return klass()
 
@@ -652,8 +647,7 @@ class CompiledRouterNode:
 
             if matches[0].span() == (0, len(raw_segment)):
                 # NOTE(kgriffs): Single field, spans entire segment
-                if len(matches) != 1:
-                    raise AssertionError
+                assert len(matches) == 1
 
                 # TODO(kgriffs): It is not "complex" because it only
                 # contains a single field. Rename this variable to make
@@ -692,8 +686,7 @@ class CompiledRouterNode:
                 self.var_pattern = re.compile(pattern_text)
 
         if self.is_complex:
-            if not self.is_var:
-                raise AssertionError
+            assert self.is_var
 
     def matches(self, segment):
         """Return True if this node matches the supplied template segment."""
@@ -707,8 +700,7 @@ class CompiledRouterNode:
         # checked if the segment matches. By definition, only unmatched
         # segments may conflict, so there isn't any sense in calling
         # conflicts_with in that case.
-        if self.matches(segment):
-            raise AssertionError
+        assert not self.matches(segment)
 
         # NOTE(kgriffs): Possible combinations are as follows.
         #
@@ -749,7 +741,8 @@ class CompiledRouterNode:
                             _FIELD_PATTERN.sub('v', segment))
 
                 return False
-            return other.is_var and not other.is_complex
+            else:
+                return other.is_var and not other.is_complex
 
         # NOTE(kgriffs): If self is a static string match, then all the cases
         # for other are False, so no need to check.
@@ -781,8 +774,7 @@ class ConverterDict(UserDict):
         self._validate(name)
         UserDict.__setitem__(self, name, converter)
 
-    @staticmethod
-    def _validate(name):
+    def _validate(self, name):
         if not _IDENTIFIER_PATTERN.match(name):
             raise ValueError(
                 'Invalid converter name. Names may not be blank, and may '
@@ -965,32 +957,28 @@ class _CxSetFragmentFromPath:
 
 
 class _CxSetParamsFromPatternMatch:
-    @staticmethod
-    def src(indentation):
+    def src(self, indentation):
         return '{0}params.update(match.groupdict())'.format(
             _TAB_STR * indentation
         )
 
 
 class _CxSetParamsFromPatternMatchPrefetched:
-    @staticmethod
-    def src(indentation):
+    def src(self, indentation):
         return '{0}params.update(groups)'.format(
             _TAB_STR * indentation
         )
 
 
 class _CxPrefetchGroupsFromPatternMatch:
-    @staticmethod
-    def src(indentation):
+    def src(self, indentation):
         return '{0}groups = match.groupdict()'.format(
             _TAB_STR * indentation
         )
 
 
 class _CxReturnNone:
-    @staticmethod
-    def src(indentation):
+    def src(self, indentation):
         return '{0}return None'.format(_TAB_STR * indentation)
 
 

@@ -323,7 +323,7 @@ class Response(falcon.response.Response):
                     'pass the function itself, rather than the result obtained '
                     'by calling the function. '
                 )
-            if is_python_func(callback):  # pragma: nocover
+            elif is_python_func(callback):  # pragma: nocover
                 raise TypeError('The callback must be a coroutine function.')
 
             # NOTE(kgriffs): The implicit "else" branch is actually covered

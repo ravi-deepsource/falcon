@@ -18,65 +18,55 @@ _SIZE_1_KB = 1024
 @pytest.mark.usefixtures('_setup_wsgi_server')
 class TestWSGIServer:
 
-    @staticmethod
-    def test_get():
+    def test_get(self):
         resp = requests.get(_SERVER_BASE_URL)
         assert resp.status_code == 200
         assert resp.text == '127.0.0.1'
 
-    @staticmethod
-    def test_put():
+    def test_put(self):
         body = '{}'
         resp = requests.put(_SERVER_BASE_URL, data=body)
         assert resp.status_code == 200
         assert resp.text == '{}'
 
-    @staticmethod
-    def test_head_405():
+    def test_head_405(self):
         body = '{}'
         resp = requests.head(_SERVER_BASE_URL, data=body)
         assert resp.status_code == 405
 
-    @staticmethod
-    def test_post():
+    def test_post(self):
         body = testing.rand_string(_SIZE_1_KB / 2, _SIZE_1_KB)
         resp = requests.post(_SERVER_BASE_URL, data=body)
         assert resp.status_code == 200
         assert resp.text == body
 
-    @staticmethod
-    def test_post_invalid_content_length():
+    def test_post_invalid_content_length(self):
         headers = {'Content-Length': 'invalid'}
         resp = requests.post(_SERVER_BASE_URL, headers=headers)
         assert resp.status_code == 400
 
-    @staticmethod
-    def test_post_read_bounded_stream():
+    def test_post_read_bounded_stream(self):
         body = testing.rand_string(_SIZE_1_KB / 2, _SIZE_1_KB)
         resp = requests.post(_SERVER_BASE_URL + 'bucket', data=body)
         assert resp.status_code == 200
         assert resp.text == body
 
-    @staticmethod
-    def test_post_read_bounded_stream_no_body():
+    def test_post_read_bounded_stream_no_body(self):
         resp = requests.post(_SERVER_BASE_URL + 'bucket')
         assert not resp.text
 
 
 def _run_server(stop_event, host, port):
     class Things:
-        @staticmethod
-        def on_get(req, resp):
+        def on_get(self, req, resp):
             resp.body = req.remote_addr
 
-        @staticmethod
-        def on_post(req, resp):
+        def on_post(self, req, resp):
             # NOTE(kgriffs): Elsewhere we just use req.bounded_stream, so
             # here we read the stream directly to test that use case.
             resp.body = req.stream.read(req.content_length or 0)
 
-        @staticmethod
-        def on_put(req, resp):
+        def on_put(self, req, resp):
             # NOTE(kgriffs): Test that reading past the end does
             # not hang.
             req_body = (req.bounded_stream.read(1)
@@ -85,8 +75,7 @@ def _run_server(stop_event, host, port):
             resp.body = b''.join(req_body)
 
     class Bucket:
-        @staticmethod
-        def on_post(req, resp):
+        def on_post(self, req, resp):
             # NOTE(kgriffs): This would normally block when
             # Content-Length is 0 and the WSGI input object.
             # BoundedStream fixes that. This is just a sanity check to

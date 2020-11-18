@@ -28,8 +28,7 @@ def client(asgi):
 
 class FaultyResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         status = req.get_header('X-Error-Status')
         title = req.get_header('X-Error-Title')
         description = req.get_header('X-Error-Description')
@@ -37,15 +36,13 @@ class FaultyResource:
 
         raise falcon.HTTPError(status, title=title, description=description, code=code)
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         raise falcon.HTTPForbidden(
             title='Request denied',
             description='You do not have write permissions for this queue.',
             href='http://example.com/api/rbac')
 
-    @staticmethod
-    def on_put(req, resp):
+    def on_put(self, req, resp):
         raise falcon.HTTPError(
             falcon.HTTP_792,
             title='Internet crashed',
@@ -54,8 +51,7 @@ class FaultyResource:
             href_text='Drill baby drill!',
             code=8733224)
 
-    @staticmethod
-    def on_patch(req, resp):
+    def on_patch(self, req, resp):
         raise falcon.HTTPError(falcon.HTTP_400)
 
 
@@ -83,25 +79,23 @@ class MiscErrorsResource:
     def on_get(self, req, resp):
         if self.needs_title:
             raise self._exception(title='Excuse Us', description='Something went boink!')
-        raise self._exception(title='Something went boink!')
+        else:
+            raise self._exception(title='Something went boink!')
 
 
 class UnauthorizedResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPUnauthorized(title='Authentication Required',
                                       description='Missing or invalid authorization.',
                                       challenges=['Basic realm="simple"'])
 
-    @staticmethod
-    def on_post(req, resp):
+    def on_post(self, req, resp):
         raise falcon.HTTPUnauthorized(title='Authentication Required',
                                       description='Missing or invalid authorization.',
                                       challenges=['Newauth realm="apps"', 'Basic realm="simple"'])
 
-    @staticmethod
-    def on_put(req, resp):
+    def on_put(self, req, resp):
         raise falcon.HTTPUnauthorized(title='Authentication Required',
                                       description='Missing or invalid authorization.',
                                       challenges=[])
@@ -109,43 +103,37 @@ class UnauthorizedResource:
 
 class NotFoundResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPNotFound()
 
 
 class NotFoundResourceWithBody:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPNotFound(description='Not Found')
 
 
 class GoneResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPGone()
 
 
 class GoneResourceWithBody:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPGone(description='Gone with the wind')
 
 
 class MethodNotAllowedResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMethodNotAllowed(['PUT'])
 
 
 class MethodNotAllowedResourceWithHeaders:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMethodNotAllowed(['PUT'],
                                           headers={
                                               'x-ping': 'pong'})
@@ -153,8 +141,7 @@ class MethodNotAllowedResourceWithHeaders:
 
 class MethodNotAllowedResourceWithHeadersWithAccept:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMethodNotAllowed(['PUT'],
                                           headers={
                                               'x-ping': 'pong',
@@ -163,23 +150,20 @@ class MethodNotAllowedResourceWithHeadersWithAccept:
 
 class MethodNotAllowedResourceWithBody:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMethodNotAllowed(['PUT'],
                                           description='Not Allowed')
 
 
 class LengthRequiredResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPLengthRequired(title='title', description='description')
 
 
 class RequestEntityTooLongResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPPayloadTooLarge(title='Request Rejected',
                                          description='Request Body Too Large')
 
@@ -210,8 +194,7 @@ class UriTooLongResource:
 
 class RangeNotSatisfiableResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPRangeNotSatisfiable(123456)
 
 
@@ -239,8 +222,7 @@ class ServiceUnavailableResource:
 
 class InvalidHeaderResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPInvalidHeader(
             'Please provide a valid token.', 'X-Auth-Token',
             code='A1001')
@@ -248,15 +230,13 @@ class InvalidHeaderResource:
 
 class MissingHeaderResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMissingHeader('X-Auth-Token')
 
 
 class InvalidParamResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPInvalidParam(
             'The value must be a hex-encoded UUID.', 'id',
             code='P1002')
@@ -264,22 +244,19 @@ class InvalidParamResource:
 
 class MissingParamResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         raise falcon.HTTPMissingParam('id', code='P1003')
 
 
 class TestHTTPError:
 
-    @staticmethod
-    def _misc_test(client, exception, status, needs_title=True):
+    def _misc_test(self, client, exception, status, needs_title=True):
         client.app.add_route('/misc', MiscErrorsResource(exception, needs_title))
 
         response = client.simulate_request(path='/misc')
         assert response.status == status
 
-    @staticmethod
-    def test_base_class(client):
+    def test_base_class(self, client):
         headers = {
             'X-Error-Title': 'Storage service down',
             'X-Error-Description': ('The configured storage service is not '
@@ -311,20 +288,17 @@ class TestHTTPError:
         assert response.status == headers['X-Error-Status']
         assert response.json == expected_body
 
-    @staticmethod
-    def test_has_representation():
+    def test_has_representation(self):
         with pytest.warns(DeprecatedWarning, match='has_representation is deprecated'):
             assert falcon.HTTPError(falcon.HTTP_701).has_representation is True
 
-    @staticmethod
-    def test_no_description_json(client):
+    def test_no_description_json(self, client):
         response = client.simulate_patch('/fail')
         assert response.status == falcon.HTTP_400
         assert response.json == {'title': '400 Bad Request'}
         assert response.headers['Content-Type'] == 'application/json'
 
-    @staticmethod
-    def test_no_description_xml(client):
+    def test_no_description_xml(self, client):
         response = client.simulate_patch(
             path='/fail', headers={'Accept': 'application/xml'}
         )
@@ -336,8 +310,7 @@ class TestHTTPError:
         assert response.content == expected_xml
         assert response.headers['Content-Type'] == 'application/xml'
 
-    @staticmethod
-    def test_client_does_not_accept_json_or_xml(client):
+    def test_client_does_not_accept_json_or_xml(self, client):
         headers = {
             'Accept': 'application/x-yaml',
             'X-Error-Title': 'Storage service down',
@@ -352,8 +325,7 @@ class TestHTTPError:
         assert response.headers['Vary'] == 'Accept'
         assert not response.content
 
-    @staticmethod
-    def test_custom_error_serializer(client):
+    def test_custom_error_serializer(self, client):
         headers = {
             'X-Error-Title': 'Storage service down',
             'X-Error-Description': ('The configured storage service is not '
@@ -431,8 +403,7 @@ class TestHTTPError:
         assert resp.json['title']
         assert resp.json['status'] == status
 
-    @staticmethod
-    def test_custom_serializer_no_representation(client):
+    def test_custom_serializer_no_representation(self, client):
         def _chatty_serializer(req, resp, exception):
             resp.content_type = falcon.MEDIA_TEXT
             resp.body = b'You might think this error should not have a body'
@@ -442,8 +413,7 @@ class TestHTTPError:
         resp = client.simulate_get(path='/416')
         assert resp.text == 'You might think this error should not have a body'
 
-    @staticmethod
-    def test_client_does_not_accept_anything(client):
+    def test_client_does_not_accept_anything(self, client):
         headers = {
             'Accept': '45087gigo;;;;',
             'X-Error-Title': 'Storage service down',
@@ -481,8 +451,7 @@ class TestHTTPError:
         assert response.status == falcon.HTTP_403
         assert response.json == expected_body
 
-    @staticmethod
-    def test_epic_fail_json(client):
+    def test_epic_fail_json(self, client):
         headers = {'Accept': 'application/json'}
 
         expected_body = {
@@ -533,8 +502,7 @@ class TestHTTPError:
             pytest.fail()
         assert response.text == expected_body
 
-    @staticmethod
-    def test_unicode_json(client):
+    def test_unicode_json(self, client):
         unicode_resource = UnicodeFaultyResource()
 
         expected_body = {
@@ -554,8 +522,7 @@ class TestHTTPError:
         assert response.status == falcon.HTTP_792
         assert expected_body == response.json
 
-    @staticmethod
-    def test_unicode_xml(client):
+    def test_unicode_xml(self, client):
         unicode_resource = UnicodeFaultyResource()
 
         expected_body = ('<?xml version="1.0" encoding="UTF-8"?>' +
@@ -581,8 +548,7 @@ class TestHTTPError:
         assert response.status == falcon.HTTP_792
         assert expected_body == response.text
 
-    @staticmethod
-    def test_401(client):
+    def test_401(self, client):
         client.app.add_route('/401', UnauthorizedResource())
         response = client.simulate_request(path='/401')
 
@@ -599,8 +565,7 @@ class TestHTTPError:
         assert response.status == falcon.HTTP_401
         assert 'www-authenticate' not in response.headers
 
-    @staticmethod
-    def test_404_without_body(client):
+    def test_404_without_body(self, client):
         client.app.add_route('/404', NotFoundResource())
         response = client.simulate_request(path='/404')
 
@@ -608,8 +573,7 @@ class TestHTTPError:
         assert response.json == falcon.HTTPNotFound().to_dict()
         assert response.json == {'title': falcon.HTTP_NOT_FOUND}
 
-    @staticmethod
-    def test_404_with_body(client):
+    def test_404_with_body(self, client):
         client.app.add_route('/404', NotFoundResourceWithBody())
 
         response = client.simulate_request(path='/404')
@@ -621,8 +585,7 @@ class TestHTTPError:
         }
         assert response.json == expected_body
 
-    @staticmethod
-    def test_405_without_body(client):
+    def test_405_without_body(self, client):
         client.app.add_route('/405', MethodNotAllowedResource())
 
         response = client.simulate_request(path='/405')
@@ -631,8 +594,7 @@ class TestHTTPError:
         assert response.json == {'title': falcon.HTTP_METHOD_NOT_ALLOWED}
         assert response.headers['allow'] == 'PUT'
 
-    @staticmethod
-    def test_405_without_body_with_extra_headers(client):
+    def test_405_without_body_with_extra_headers(self, client):
         client.app.add_route('/405', MethodNotAllowedResourceWithHeaders())
 
         response = client.simulate_request(path='/405')
@@ -641,8 +603,7 @@ class TestHTTPError:
         assert response.headers['allow'] == 'PUT'
         assert response.headers['x-ping'] == 'pong'
 
-    @staticmethod
-    def test_405_without_body_with_extra_headers_double_check(client):
+    def test_405_without_body_with_extra_headers_double_check(self, client):
         client.app.add_route(
             '/405', MethodNotAllowedResourceWithHeadersWithAccept()
         )
@@ -655,8 +616,7 @@ class TestHTTPError:
         assert response.headers['allow'] != 'GET'
         assert response.headers['x-ping'] == 'pong'
 
-    @staticmethod
-    def test_405_with_body(client):
+    def test_405_with_body(self, client):
         client.app.add_route('/405', MethodNotAllowedResourceWithBody())
 
         response = client.simulate_request(path='/405')
@@ -669,8 +629,7 @@ class TestHTTPError:
         assert response.json == expected_body
         assert response.headers['allow'] == 'PUT'
 
-    @staticmethod
-    def test_410_without_body(client):
+    def test_410_without_body(self, client):
         client.app.add_route('/410', GoneResource())
         response = client.simulate_request(path='/410')
 
@@ -678,8 +637,7 @@ class TestHTTPError:
         assert response.text == falcon.HTTPGone().to_json()
         assert response.json == {'title': '410 Gone'}
 
-    @staticmethod
-    def test_410_with_body(client):
+    def test_410_with_body(self, client):
         client.app.add_route('/410', GoneResourceWithBody())
 
         response = client.simulate_request(path='/410')
@@ -691,8 +649,7 @@ class TestHTTPError:
         }
         assert response.json == expected_body
 
-    @staticmethod
-    def test_411(client):
+    def test_411(self, client):
         client.app.add_route('/411', LengthRequiredResource())
         response = client.simulate_request(path='/411')
         assert response.status == falcon.HTTP_411
@@ -701,8 +658,7 @@ class TestHTTPError:
         assert parsed_body['title'] == 'title'
         assert parsed_body['description'] == 'description'
 
-    @staticmethod
-    def test_413(client):
+    def test_413(self, client):
         client.app.add_route('/413', RequestEntityTooLongResource())
         response = client.simulate_request(path='/413')
         assert response.status == falcon.HTTP_413
@@ -712,8 +668,7 @@ class TestHTTPError:
         assert parsed_body['description'] == 'Request Body Too Large'
         assert 'retry-after' not in response.headers
 
-    @staticmethod
-    def test_temporary_413_integer_retry_after(client):
+    def test_temporary_413_integer_retry_after(self, client):
         client.app.add_route('/413', TemporaryRequestEntityTooLongResource('6'))
         response = client.simulate_request(path='/413')
         assert response.status == falcon.HTTP_413
@@ -723,8 +678,7 @@ class TestHTTPError:
         assert parsed_body['description'] == 'Request Body Too Large'
         assert response.headers['retry-after'] == '6'
 
-    @staticmethod
-    def test_temporary_413_datetime_retry_after(client):
+    def test_temporary_413_datetime_retry_after(self, client):
         date = datetime.datetime.now() + datetime.timedelta(minutes=5)
         client.app.add_route(
             '/413',
@@ -739,38 +693,33 @@ class TestHTTPError:
         assert parsed_body['description'] == 'Request Body Too Large'
         assert response.headers['retry-after'] == falcon.util.dt_to_http(date)
 
-    @staticmethod
-    def test_414(client):
+    def test_414(self, client):
         client.app.add_route('/414', UriTooLongResource())
         response = client.simulate_request(path='/414')
         assert response.status == falcon.HTTP_414
 
-    @staticmethod
-    def test_414_with_title(client):
+    def test_414_with_title(self, client):
         title = 'Argh! Error!'
         client.app.add_route('/414', UriTooLongResource(title=title))
         response = client.simulate_request(path='/414', headers={})
         parsed_body = json.loads(response.content.decode())
         assert parsed_body['title'] == title
 
-    @staticmethod
-    def test_414_with_description(client):
+    def test_414_with_description(self, client):
         description = 'Be short please.'
         client.app.add_route('/414', UriTooLongResource(description=description))
         response = client.simulate_request(path='/414', headers={})
         parsed_body = json.loads(response.content.decode())
         assert parsed_body['description'] == description
 
-    @staticmethod
-    def test_414_with_custom_kwargs(client):
+    def test_414_with_custom_kwargs(self, client):
         code = 'someid'
         client.app.add_route('/414', UriTooLongResource(code=code))
         response = client.simulate_request(path='/414', headers={})
         parsed_body = json.loads(response.content.decode())
         assert parsed_body['code'] == code
 
-    @staticmethod
-    def test_416(client, asgi):
+    def test_416(self, client, asgi):
         client.app = create_app(asgi)
         client.app.add_route('/416', RangeNotSatisfiableResource())
         response = client.simulate_request(path='/416', headers={'accept': 'text/xml'})
@@ -785,8 +734,7 @@ class TestHTTPError:
         assert response.headers['content-range'] == 'bytes */123456'
         assert response.headers['content-length'] == str(len(response.content))
 
-    @staticmethod
-    def test_429_no_retry_after(client):
+    def test_429_no_retry_after(self, client):
         client.app.add_route('/429', TooManyRequestsResource())
         response = client.simulate_request(path='/429')
         parsed_body = response.json
@@ -796,8 +744,7 @@ class TestHTTPError:
         assert parsed_body['description'] == '1 per minute'
         assert 'retry-after' not in response.headers
 
-    @staticmethod
-    def test_429(client):
+    def test_429(self, client):
         client.app.add_route('/429', TooManyRequestsResource(60))
         response = client.simulate_request(path='/429')
         parsed_body = response.json
@@ -807,8 +754,7 @@ class TestHTTPError:
         assert parsed_body['description'] == '1 per minute'
         assert response.headers['retry-after'] == '60'
 
-    @staticmethod
-    def test_429_datetime(client):
+    def test_429_datetime(self, client):
         date = datetime.datetime.now() + datetime.timedelta(minutes=1)
         client.app.add_route('/429', TooManyRequestsResource(date))
         response = client.simulate_request(path='/429')
@@ -819,8 +765,7 @@ class TestHTTPError:
         assert parsed_body['description'] == '1 per minute'
         assert response.headers['retry-after'] == falcon.util.dt_to_http(date)
 
-    @staticmethod
-    def test_503_integer_retry_after(client):
+    def test_503_integer_retry_after(self, client):
         client.app.add_route('/503', ServiceUnavailableResource(60))
         response = client.simulate_request(path='/503')
 
@@ -833,8 +778,7 @@ class TestHTTPError:
         assert response.json == expected_body
         assert response.headers['retry-after'] == '60'
 
-    @staticmethod
-    def test_503_datetime_retry_after(client):
+    def test_503_datetime_retry_after(self, client):
         date = datetime.datetime.now() + datetime.timedelta(minutes=5)
         client.app.add_route('/503', ServiceUnavailableResource(date))
         response = client.simulate_request(path='/503')
@@ -848,8 +792,7 @@ class TestHTTPError:
         assert response.json == expected_body
         assert response.headers['retry-after'] == falcon.util.dt_to_http(date)
 
-    @staticmethod
-    def test_invalid_header(client):
+    def test_invalid_header(self, client):
         client.app.add_route('/400', InvalidHeaderResource())
         response = client.simulate_request(path='/400')
 
@@ -865,8 +808,7 @@ class TestHTTPError:
         assert response.status == falcon.HTTP_400
         assert response.json == expected_body
 
-    @staticmethod
-    def test_missing_header(client):
+    def test_missing_header(self, client):
         client.app.add_route('/400', MissingHeaderResource())
         response = client.simulate_request(path='/400')
 
@@ -878,8 +820,7 @@ class TestHTTPError:
         assert response.status == falcon.HTTP_400
         assert response.json == expected_body
 
-    @staticmethod
-    def test_invalid_param(client):
+    def test_invalid_param(self, client):
         client.app.add_route('/400', InvalidParamResource())
         response = client.simulate_request(path='/400')
 
@@ -894,8 +835,7 @@ class TestHTTPError:
         assert response.status == falcon.HTTP_400
         assert response.json == expected_body
 
-    @staticmethod
-    def test_missing_param(client):
+    def test_missing_param(self, client):
         client.app.add_route('/400', MissingParamResource())
         response = client.simulate_request(path='/400')
 
@@ -922,8 +862,7 @@ class TestHTTPError:
         self._misc_test(client, falcon.HTTPInternalServerError, falcon.HTTP_500)
         self._misc_test(client, falcon.HTTPBadGateway, falcon.HTTP_502)
 
-    @staticmethod
-    def test_title_default_message_if_none(client):
+    def test_title_default_message_if_none(self, client):
         headers = {
             'X-Error-Status': falcon.HTTP_503
         }
@@ -951,8 +890,7 @@ def test_NoRepresentation():
 
 
 class TestOptionalRepresentation:
-    @staticmethod
-    def test_OptionalRepresentation_false():
+    def test_OptionalRepresentation_false(self):
         with pytest.warns(
             DeprecatedWarning,
             match='has_representation is deprecated.*The class OptionalRepresentation'
@@ -961,8 +899,7 @@ class TestOptionalRepresentation:
             or_.description = None
             assert or_.has_representation is False
 
-    @staticmethod
-    def test_OptionalRepresentation_true():
+    def test_OptionalRepresentation_true(self):
         with pytest.warns(
             DeprecatedWarning,
             match='has_representation is deprecated.*The class OptionalRepresentation'

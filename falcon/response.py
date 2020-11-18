@@ -214,8 +214,7 @@ class Response:
         raise AttributeError(_STREAM_LEN_REMOVED_MSG)
 
     @stream_len.setter
-    @staticmethod
-    def stream_len(value):
+    def stream_len(self, value):
         # NOTE(kgriffs): We explicitly disallow setting the deprecated attribute
         #   so that apps relying on it do not fail silently.
         raise AttributeError(_STREAM_LEN_REMOVED_MSG)

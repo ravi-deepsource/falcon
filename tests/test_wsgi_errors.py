@@ -19,12 +19,10 @@ def client():
 
 class LoggerResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         req.log_error(unicode_message)
 
-    @staticmethod
-    def on_head(req, resp):
+    def on_head(self, req, resp):
         req.log_error(unicode_message.encode('utf-8'))
 
 

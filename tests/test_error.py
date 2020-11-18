@@ -235,16 +235,14 @@ def test_custom_400(err, args, title, desc):
     (falcon.HTTPServiceUnavailable, 'Retry-After', 'retry_after', 123, '123', False),
 ))
 class TestErrorsWithHeadersKW:
-    @staticmethod
-    def test_no_header(err, header_name, kw_name, args, res, kw_required):
+    def test_no_header(self, err, header_name, kw_name, args, res, kw_required):
         if not kw_required:
             value = err()
 
             if value.headers:
                 assert header_name not in value.headers
 
-    @staticmethod
-    def test_other_header(err, header_name, kw_name, args, res, kw_required):
+    def test_other_header(self, err, header_name, kw_name, args, res, kw_required):
         headers = {'foo bar': 'baz'}
         kw = {kw_name: args}
         value = err(**kw, headers=headers)
@@ -253,8 +251,7 @@ class TestErrorsWithHeadersKW:
         assert header_name in value.headers
         assert value.headers[header_name] == res
 
-    @staticmethod
-    def test_override_header(err, header_name, kw_name, args, res, kw_required):
+    def test_override_header(self, err, header_name, kw_name, args, res, kw_required):
         headers = {'foo bar': 'baz', header_name: 'other'}
         kw = {kw_name: args}
         value = err(**kw, headers=headers)
@@ -263,8 +260,7 @@ class TestErrorsWithHeadersKW:
         assert header_name in value.headers
         assert value.headers[header_name] == res
 
-    @staticmethod
-    def test_other_header_list(err, header_name, kw_name, args, res, kw_required):
+    def test_other_header_list(self, err, header_name, kw_name, args, res, kw_required):
         headers = [('foo bar', 'baz')]
         kw = {kw_name: args}
         value = err(**kw, headers=headers)
@@ -274,8 +270,7 @@ class TestErrorsWithHeadersKW:
         assert isinstance(value.headers, dict)
         assert value.headers[header_name] == res
 
-    @staticmethod
-    def test_override_header_list(err, header_name, kw_name, args, res, kw_required):
+    def test_override_header_list(self, err, header_name, kw_name, args, res, kw_required):
         headers = [('foo bar', 'baz'), (header_name, 'other')]
         kw = {kw_name: args}
         value = err(**kw, headers=headers)

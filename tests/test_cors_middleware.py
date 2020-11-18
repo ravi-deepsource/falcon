@@ -23,20 +23,17 @@ def cors_client(asgi):
 
 class CORSHeaderResource:
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         resp.body = "I'm a CORS test response"
 
-    @staticmethod
-    def on_delete(req, resp):
+    def on_delete(self, req, resp):
         resp.set_header('Access-Control-Allow-Origin', 'example.com')
         resp.body = "I'm a CORS test response"
 
 
 class TestCorsMiddleware:
 
-    @staticmethod
-    def test_disabled_cors_should_not_add_any_extra_headers(client):
+    def test_disabled_cors_should_not_add_any_extra_headers(self, client):
         client.app.add_route('/', CORSHeaderResource())
         result = client.simulate_get(headers={'Origin': 'localhost'})
         h = dict(result.headers.lower_items()).keys()
@@ -44,8 +41,7 @@ class TestCorsMiddleware:
         assert 'Access-Control-Allow-Credentials'.lower() not in h
         assert 'Access-Control-Expose-Headers'.lower() not in h
 
-    @staticmethod
-    def test_enabled_cors_no_origin(client):
+    def test_enabled_cors_no_origin(self, client):
         client.app.add_route('/', CORSHeaderResource())
         result = client.simulate_get()
         h = dict(result.headers.lower_items()).keys()
@@ -53,15 +49,13 @@ class TestCorsMiddleware:
         assert 'Access-Control-Allow-Credentials'.lower() not in h
         assert 'Access-Control-Expose-Headers'.lower() not in h
 
-    @staticmethod
-    def test_enabled_cors_should_add_extra_headers_on_response(cors_client):
+    def test_enabled_cors_should_add_extra_headers_on_response(self, cors_client):
         cors_client.app.add_route('/', CORSHeaderResource())
         result = cors_client.simulate_get(headers={'Origin': 'localhost'})
         assert 'Access-Control-Allow-Origin'.lower() in dict(
             result.headers.lower_items()).keys()
 
-    @staticmethod
-    def test_enabled_cors_should_accept_all_origins_requests(cors_client):
+    def test_enabled_cors_should_accept_all_origins_requests(self, cors_client):
         cors_client.app.add_route('/', CORSHeaderResource())
 
         result = cors_client.simulate_get(headers={'Origin': 'localhost'})
@@ -70,8 +64,7 @@ class TestCorsMiddleware:
         result = cors_client.simulate_delete(headers={'Origin': 'localhost'})
         assert result.headers['Access-Control-Allow-Origin'] == 'example.com'
 
-    @staticmethod
-    def test_enabled_cors_handles_preflighting(cors_client):
+    def test_enabled_cors_handles_preflighting(self, cors_client):
         cors_client.app.add_route('/', CORSHeaderResource())
         result = cors_client.simulate_options(headers=(
             ('Origin', 'localhost'),
@@ -82,8 +75,7 @@ class TestCorsMiddleware:
         assert result.headers['Access-Control-Allow-Headers'] == 'X-PINGOTHER, Content-Type'
         assert result.headers['Access-Control-Max-Age'] == '86400'  # 24 hours in seconds
 
-    @staticmethod
-    def test_enabled_cors_handles_preflighting_no_headers_in_req(cors_client):
+    def test_enabled_cors_handles_preflighting_no_headers_in_req(self, cors_client):
         cors_client.app.add_route('/', CORSHeaderResource())
         result = cors_client.simulate_options(headers=(
             ('Origin', 'localhost'),
@@ -104,8 +96,7 @@ def make_cors_client(asgi):
 
 class TestCustomCorsMiddleware:
 
-    @staticmethod
-    def test_raises():
+    def test_raises(self):
         with pytest.raises(ValueError, match='passed to allow_origins'):
             falcon.CORSMiddleware(allow_origins=['*'])
         with pytest.raises(ValueError, match='passed to allow_credentials'):
@@ -135,8 +126,7 @@ class TestCustomCorsMiddleware:
             assert 'Access-Control-Allow-Credentials'.lower() not in h
             assert 'Access-Control-Expose-Headers'.lower() not in h
 
-    @staticmethod
-    def test_allow_credential_wildcard(make_cors_client):
+    def test_allow_credential_wildcard(self, make_cors_client):
         client = make_cors_client(falcon.CORSMiddleware(allow_credentials='*'))
         client.app.add_route('/', CORSHeaderResource())
 
@@ -166,8 +156,7 @@ class TestCustomCorsMiddleware:
             h = dict(res.headers.lower_items()).keys()
             assert 'Access-Control-Expose-Headers'.lower() not in h
 
-    @staticmethod
-    def test_allow_credential_existing_origin(make_cors_client):
+    def test_allow_credential_existing_origin(self, make_cors_client):
         client = make_cors_client(falcon.CORSMiddleware(allow_credentials='*'))
         client.app.add_route('/', CORSHeaderResource())
 
@@ -176,8 +165,7 @@ class TestCustomCorsMiddleware:
         h = dict(res.headers.lower_items()).keys()
         assert 'Access-Control-Allow-Credentials'.lower() not in h
 
-    @staticmethod
-    def test_allow_origin_allow_credential(make_cors_client):
+    def test_allow_origin_allow_credential(self, make_cors_client):
         client = make_cors_client(
             falcon.CORSMiddleware(allow_origins='test', allow_credentials='*'))
         client.app.add_route('/', CORSHeaderResource())

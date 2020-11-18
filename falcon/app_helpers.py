@@ -224,7 +224,8 @@ class CloseableStreamIterator:
 
         if data == b'':
             raise StopIteration
-        return data
+        else:
+            return data
 
     def close(self):
         try:

@@ -80,8 +80,7 @@ class Fish:
         assert resource
         params['fish'] = 'slippery'
 
-    @staticmethod
-    def hook(req, resp, resource, params):
+    def hook(self, req, resp, resource, params):
         assert resource
         params['fish'] = 'wet'
 
@@ -123,6 +122,10 @@ class WrappedRespondersResourceChild(WrappedRespondersResource):
     @falcon.before(validate_param, 'x', maxval=1000)
     def on_get(self, req, resp):
         pass
+
+    def on_put(self, req, resp):
+        # Test passing no extra args
+        super(WrappedRespondersResourceChild, self).on_put(req, resp)
 
 
 class WrappedRespondersBodyParserResource:
@@ -203,7 +206,10 @@ class TestFieldResource:
 
 
 class TestFieldResourceChild(TestFieldResource):
-    pass
+
+    def on_get(self, req, resp, id):
+        # Test passing a single extra arg
+        super(TestFieldResourceChild, self).on_get(req, resp, id)
 
 
 class TestFieldResourceChildToo(TestFieldResource):
@@ -463,12 +469,10 @@ class PiggybackingCollection:
         resp.media = sorted(self._items.values(),
                             key=lambda item: item['itemid'])
 
-    @staticmethod
-    def on_head_():
+    def on_head_(self):
         return 'I shall not be decorated.'
 
-    @staticmethod
-    def on_header():
+    def on_header(self):
         return 'I shall not be decorated.'
 
     def on_post_collection(self, req, resp):

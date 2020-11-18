@@ -12,8 +12,7 @@ class Resource:
     def __init__(self, image_store):
         self._image_store = image_store
 
-    @staticmethod
-    def on_get(req, resp):
+    def on_get(self, req, resp):
         doc = {
             'images': [
                 {

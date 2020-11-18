@@ -345,8 +345,7 @@ def test_converter_custom(client, resource, uri_template, path, expected):
         def __init__(self, useless_text=None):
             pass
 
-        @staticmethod
-        def convert(fragment):
+        def convert(self, fragment):
             return 'spam!'
 
     client.app.router_options.converters['spam'] = SpamConverter

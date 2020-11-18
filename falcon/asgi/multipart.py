@@ -148,7 +148,7 @@ class MultipartForm:
                     # NOTE(vytas): RFC 7578, section 4.8.
                     #   Other header fields MUST NOT be included and MUST be
                     #   ignored.
-                    if name in _ALLOWED_CONTENT_HEADERS:
+                    elif name in _ALLOWED_CONTENT_HEADERS:
                         headers[name] = value
 
             remaining_parts -= 1

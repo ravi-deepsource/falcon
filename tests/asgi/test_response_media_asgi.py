@@ -182,8 +182,7 @@ def runTest(test_fn):
 
 
 class TestRenderBodyPrecedence:
-    @staticmethod
-    def test_body():
+    def test_body(self):
         async def test(resp):
             resp.body = 'body'
             resp.data = b'data'
@@ -193,8 +192,7 @@ class TestRenderBodyPrecedence:
 
         runTest(test)
 
-    @staticmethod
-    def test_data():
+    def test_data(self):
         async def test(resp):
             resp.data = b'data'
             resp.media = ['media']
@@ -203,8 +201,7 @@ class TestRenderBodyPrecedence:
 
         runTest(test)
 
-    @staticmethod
-    def test_media():
+    def test_media(self):
         async def test(resp):
             resp.media = ['media']
             assert json.loads((await resp.render_body()).decode('utf-8')) == ['media']

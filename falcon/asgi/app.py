@@ -722,8 +722,7 @@ class App(falcon.app.App):
     # Helper methods
     # ------------------------------------------------------------------------
 
-    @staticmethod
-    def _schedule_callbacks(resp):
+    def _schedule_callbacks(self, resp):
         callbacks = resp._registered_callbacks
         if not callbacks:
             return

@@ -73,8 +73,7 @@ class AuthMiddleware:
                                           challenges=challenges,
                                           href='http://docs.example.com/auth')
 
-    @staticmethod
-    def _token_is_valid(token, account_id):
+    def _token_is_valid(self, token, account_id):
         return True  # Suuuuuure it's valid...
 
 

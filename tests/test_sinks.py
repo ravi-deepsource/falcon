@@ -9,8 +9,7 @@ from _util import create_app  # NOQA
 
 
 class Proxy:
-    @staticmethod
-    def forward(req):
+    def forward(self, req):
         return falcon.HTTP_503
 
 
@@ -24,7 +23,8 @@ class Sink:
 
 
 class SinkAsync(Sink):
-    pass
+    async def __call__(self, req, resp, **kwargs):
+        super().__call__(req, resp, **kwargs)
 
 
 class BookCollection(testing.SimpleTestResource):
@@ -49,22 +49,19 @@ def client(asgi):
 
 class TestDefaultRouting:
 
-    @staticmethod
-    def test_single_default_pattern(client, sink, resource):
+    def test_single_default_pattern(self, client, sink, resource):
         client.app.add_sink(sink)
 
         response = client.simulate_request(path='/')
         assert response.status == falcon.HTTP_503
 
-    @staticmethod
-    def test_single_simple_pattern(client, sink, resource):
+    def test_single_simple_pattern(self, client, sink, resource):
         client.app.add_sink(sink, r'/foo')
 
         response = client.simulate_request(path='/foo/bar')
         assert response.status == falcon.HTTP_503
 
-    @staticmethod
-    def test_single_compiled_pattern(client, sink, resource):
+    def test_single_compiled_pattern(self, client, sink, resource):
         client.app.add_sink(sink, re.compile(r'/foo'))
 
         response = client.simulate_request(path='/foo/bar')
@@ -73,8 +70,7 @@ class TestDefaultRouting:
         response = client.simulate_request(path='/auth')
         assert response.status == falcon.HTTP_404
 
-    @staticmethod
-    def test_named_groups(client, sink, resource):
+    def test_named_groups(self, client, sink, resource):
         client.app.add_sink(sink, r'/user/(?P<id>\d+)')
 
         response = client.simulate_request(path='/user/309')
@@ -84,8 +80,7 @@ class TestDefaultRouting:
         response = client.simulate_request(path='/user/sally')
         assert response.status == falcon.HTTP_404
 
-    @staticmethod
-    def test_multiple_patterns(asgi, client, sink, resource):
+    def test_multiple_patterns(self, asgi, client, sink, resource):
         if asgi:
             async def sink_too(req, resp):
                 resp.status = falcon.HTTP_781
@@ -104,8 +99,7 @@ class TestDefaultRouting:
         response = client.simulate_request(path='/katza')
         assert response.status == falcon.HTTP_503
 
-    @staticmethod
-    def test_with_route(client, sink, resource):
+    def test_with_route(self, client, sink, resource):
         client.app.add_route('/books', resource)
         client.app.add_sink(sink, '/proxy')
 
@@ -117,8 +111,7 @@ class TestDefaultRouting:
         assert resource.called
         assert response.status == falcon.HTTP_200
 
-    @staticmethod
-    def test_route_precedence(client, sink, resource):
+    def test_route_precedence(self, client, sink, resource):
         # NOTE(kgriffs): In case of collision, the route takes precedence.
         client.app.add_route('/books', resource)
         client.app.add_sink(sink, '/books')
@@ -127,8 +120,7 @@ class TestDefaultRouting:
         assert resource.called
         assert response.status == falcon.HTTP_200
 
-    @staticmethod
-    def test_route_precedence_with_id(client, sink, resource):
+    def test_route_precedence_with_id(self, client, sink, resource):
         # NOTE(kgriffs): In case of collision, the route takes precedence.
         client.app.add_route('/books/{id}', resource)
         client.app.add_sink(sink, '/books')
@@ -137,8 +129,7 @@ class TestDefaultRouting:
         assert not resource.called
         assert response.status == falcon.HTTP_503
 
-    @staticmethod
-    def test_route_precedence_with_both_id(client, sink, resource):
+    def test_route_precedence_with_both_id(self, client, sink, resource):
         # NOTE(kgriffs): In case of collision, the route takes precedence.
         client.app.add_route('/books/{id}', resource)
         client.app.add_sink(sink, r'/books/\d+')

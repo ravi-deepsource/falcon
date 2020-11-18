@@ -369,17 +369,14 @@ class BufferedReader:
 
     # --- implementing IOBase methods, the duck-typing way ---
 
-    @staticmethod
-    def readable():
+    def readable(self):
         """Return ``True`` always."""
         return True
 
-    @staticmethod
-    def seekable():
+    def seekable(self):
         """Return ``False`` always."""
         return False
 
-    @staticmethod
-    def writeable():
+    def writeable(self):
         """Return ``False`` always."""
         return False

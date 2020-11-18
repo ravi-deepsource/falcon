@@ -144,12 +144,10 @@ def test_deserialization_raises(asgi):
     app.resp_options.media_handlers = handlers
 
     class Resource:
-        @staticmethod
-        def on_get(req, resp):
+        def on_get(self, req, resp):
             resp.media = {}
 
-        @staticmethod
-        def on_post(req, resp):
+        def on_post(self, req, resp):
             req.media
 
     class ResourceAsync:
@@ -192,12 +190,10 @@ def test_sync_methods_not_overridden(asgi):
     app.resp_options.media_handlers = handlers
 
     class Resource:
-        @staticmethod
-        def on_get(req, resp):
+        def on_get(self, req, resp):
             resp.media = {}
 
-        @staticmethod
-        def on_post(req, resp):
+        def on_post(self, req, resp):
             req.media
 
     class ResourceAsync:

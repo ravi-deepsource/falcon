@@ -23,8 +23,7 @@ def client():
 
 
 class TestRequestBody:
-    @staticmethod
-    def _get_wrapped_stream(req):
+    def _get_wrapped_stream(self, req):
         # Getting wrapped wsgi.input:
         stream = req.stream
         if isinstance(stream, request_helpers.BoundedStream):
@@ -82,8 +81,7 @@ class TestRequestBody:
 
         assert stream.tell() == expected_len
 
-    @staticmethod
-    def test_bounded_stream_property_empty_body():
+    def test_bounded_stream_property_empty_body(self):
         """Test that we can get a bounded stream outside of wsgiref."""
         environ = testing.create_environ()
         req = falcon.Request(environ)
@@ -97,8 +95,7 @@ class TestRequestBody:
         data = bounded_stream.read()
         assert len(data) == 0
 
-    @staticmethod
-    def test_body_stream_wrapper():
+    def test_body_stream_wrapper(self):
         data = testing.rand_string(SIZE_1_KB / 2, SIZE_1_KB)
         expected_body = data.encode('utf-8')
         expected_len = len(expected_body)
@@ -165,8 +162,7 @@ class TestRequestBody:
         for i, line in enumerate(body):
             assert line == expected_lines[i]
 
-    @staticmethod
-    def test_request_repr():
+    def test_request_repr(self):
         environ = testing.create_environ()
         req = falcon.Request(environ)
         _repr = '<%s: %s %r>' % (req.__class__.__name__, req.method, req.url)
