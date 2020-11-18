@@ -23,8 +23,7 @@ class Sink:
 
 
 class SinkAsync(Sink):
-    async def __call__(self, req, resp, **kwargs):
-        super().__call__(req, resp, **kwargs)
+    pass
 
 
 class BookCollection(testing.SimpleTestResource):
