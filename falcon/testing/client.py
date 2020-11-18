@@ -44,15 +44,10 @@ from falcon.util import (
 )
 
 warnings.filterwarnings(
-    'error',
-    (
-        'Unknown REQUEST_METHOD: ' +
-        "'({})'".format(
-            '|'.join(COMBINED_METHODS)
-        )
-    ),
+    "error",
+    ("Unknown REQUEST_METHOD: " + "'({})'".format("|".join(COMBINED_METHODS))),
     wsgiref.validate.WSGIWarning,
-    '',
+    "",
     0,
 )
 
@@ -86,16 +81,16 @@ class Cookie:
         self._value = morsel.value
 
         for name in (
-            'expires',
-            'path',
-            'domain',
-            'max_age',
-            'secure',
-            'httponly',
-            'samesite'
+            "expires",
+            "path",
+            "domain",
+            "max_age",
+            "secure",
+            "httponly",
+            "samesite",
         ):
-            value = morsel[name.replace('_', '-')] or None
-            setattr(self, '_' + name, value)
+            value = morsel[name.replace("_", "-")] or None
+            setattr(self, "_" + name, value)
 
     @property
     def name(self) -> str:
@@ -181,11 +176,10 @@ class _ResultBase:
 
         cookies = http_cookies.SimpleCookie()
         for name, value in headers:
-            if name.lower() == 'set-cookie':
+            if name.lower() == "set-cookie":
                 cookies.load(value)
 
-        self._cookies = {morsel.key: Cookie(morsel)
-            for morsel in cookies.values()}
+        self._cookies = {morsel.key: Cookie(morsel) for morsel in cookies.values()}
 
         self._encoding = helpers.get_encoding_from_headers(self._headers)
 
@@ -246,9 +240,9 @@ class ResultBodyStream:
         await asyncio.sleep(0)
 
         if self._chunk_pos >= len(self._chunks):
-            return b''
+            return b""
 
-        data = b''.join(self._chunks[self._chunk_pos:])
+        data = b"".join(self._chunks[self._chunk_pos :])
         self._chunk_pos = len(self._chunks)
 
         return data
@@ -298,7 +292,7 @@ class Result(_ResultBase):
         super().__init__(status, headers)
 
         self._text = None
-        self._content = b''.join(iterable)
+        self._content = b"".join(iterable)
 
     @property
     def content(self) -> bytes:
@@ -308,10 +302,10 @@ class Result(_ResultBase):
     def text(self) -> str:
         if self._text is None:
             if not self.content:
-                self._text = ''
+                self._text = ""
             else:
                 if self.encoding is None:
-                    encoding = 'UTF-8'
+                    encoding = "UTF-8"
                 else:
                     encoding = self.encoding
 
@@ -394,13 +388,30 @@ class StreamedResult(_ResultBase):
 #   relatively long (5 minutes) to help testers notice when something
 #   appears to be "hanging", which might indicates that the app is
 #   not handling the reception of events correctly.
-def simulate_request(app, method='GET', path='/', query_string=None,
-                     headers=None, content_type=None, body=None, json=None,
-                     file_wrapper=None, wsgierrors=None, params=None,
-                     params_csv=False, protocol='http', host=helpers.DEFAULT_HOST,
-                     remote_addr=None, extras=None, http_version='1.1',
-                     port=None, root_path=None, cookies=None, asgi_chunk_size=4096,
-                     asgi_disconnect_ttl=300) -> _ResultBase:
+def simulate_request(
+    app,
+    method="GET",
+    path="/",
+    query_string=None,
+    headers=None,
+    content_type=None,
+    body=None,
+    json=None,
+    file_wrapper=None,
+    wsgierrors=None,
+    params=None,
+    params_csv=False,
+    protocol="http",
+    host=helpers.DEFAULT_HOST,
+    remote_addr=None,
+    extras=None,
+    http_version="1.1",
+    port=None,
+    root_path=None,
+    cookies=None,
+    asgi_chunk_size=4096,
+    asgi_disconnect_ttl=300,
+) -> _ResultBase:
 
     """Simulate a request to a WSGI or ASGI application.
 
@@ -510,25 +521,44 @@ def simulate_request(app, method='GET', path='/', query_string=None,
     if _is_asgi_app(app):
         return invoke_coroutine_sync(
             _simulate_request_asgi,
-
             app,
-
-            method=method, path=path, query_string=query_string,
-            headers=headers, content_type=content_type, body=body, json=json,
-            params=params, params_csv=params_csv, protocol=protocol, host=host,
-            remote_addr=remote_addr, extras=extras, http_version=http_version,
-            port=port, root_path=root_path, asgi_chunk_size=asgi_chunk_size,
+            method=method,
+            path=path,
+            query_string=query_string,
+            headers=headers,
+            content_type=content_type,
+            body=body,
+            json=json,
+            params=params,
+            params_csv=params_csv,
+            protocol=protocol,
+            host=host,
+            remote_addr=remote_addr,
+            extras=extras,
+            http_version=http_version,
+            port=port,
+            root_path=root_path,
+            asgi_chunk_size=asgi_chunk_size,
             asgi_disconnect_ttl=asgi_disconnect_ttl,
         )
 
     path, query_string, headers, body, extras = _prepare_sim_args(
-        path, query_string, params, params_csv, content_type, headers, body, json, extras)
+        path,
+        query_string,
+        params,
+        params_csv,
+        content_type,
+        headers,
+        body,
+        json,
+        extras,
+    )
 
     env = helpers.create_environ(
         method=method,
         scheme=protocol,
         path=path,
-        query_string=(query_string or ''),
+        query_string=(query_string or ""),
         headers=headers,
         body=body,
         file_wrapper=file_wrapper,
@@ -541,14 +571,14 @@ def simulate_request(app, method='GET', path='/', query_string=None,
         cookies=cookies,
     )
 
-    if 'REQUEST_METHOD' in extras and extras['REQUEST_METHOD'] != method:
+    if "REQUEST_METHOD" in extras and extras["REQUEST_METHOD"] != method:
         # NOTE(vytas): Even given the duct tape nature of overriding
         # arbitrary environ variables, changing the method can potentially
         # be very confusing, particularly when using specialized
         # simulate_get/post/patch etc methods.
         raise ValueError(
-            'WSGI environ extras may not override the request method. '
-            'Please use the method parameter.'
+            "WSGI environ extras may not override the request method. "
+            "Please use the method parameter."
         )
 
     env.update(extras)
@@ -558,8 +588,7 @@ def simulate_request(app, method='GET', path='/', query_string=None,
 
     iterable = validator(env, srmock)
 
-    return Result(helpers.closed_wsgi_iterable(iterable),
-                  srmock.status, srmock.headers)
+    return Result(helpers.closed_wsgi_iterable(iterable), srmock.status, srmock.headers)
 
 
 # NOTE(kgriffs): The default of asgi_disconnect_ttl was chosen to be
@@ -567,20 +596,32 @@ def simulate_request(app, method='GET', path='/', query_string=None,
 #   appears to be "hanging", which might indicates that the app is
 #   not handling the reception of events correctly.
 async def _simulate_request_asgi(
-    app, method='GET', path='/', query_string=None,
-    headers=None, content_type=None, body=None, json=None, params=None,
-    params_csv=True, protocol='http', host=helpers.DEFAULT_HOST,
-    remote_addr=None, extras=None, http_version='1.1',
-    port=None, root_path=None, asgi_chunk_size=4096,
+    app,
+    method="GET",
+    path="/",
+    query_string=None,
+    headers=None,
+    content_type=None,
+    body=None,
+    json=None,
+    params=None,
+    params_csv=True,
+    protocol="http",
+    host=helpers.DEFAULT_HOST,
+    remote_addr=None,
+    extras=None,
+    http_version="1.1",
+    port=None,
+    root_path=None,
+    asgi_chunk_size=4096,
     asgi_disconnect_ttl=300,
-
     # NOTE(kgriffs): These are undocumented because they are only
     #   meant to be used internally by the framework (i.e., they are
     #   not part of the public interface.) In case we ever expose
     #   simulate_request_asgi() as part of the public interface, we
     #   don't want these kwargs to be documented.
-    _one_shot=True, _stream_result=False,
-
+    _one_shot=True,
+    _stream_result=False,
 ) -> _ResultBase:
 
     """Simulate a request to an ASGI application.
@@ -667,7 +708,16 @@ async def _simulate_request_asgi(
     """
 
     path, query_string, headers, body, extras = _prepare_sim_args(
-        path, query_string, params, params_csv, content_type, headers, body, json, extras)
+        path,
+        query_string,
+        params,
+        params_csv,
+        content_type,
+        headers,
+        body,
+        json,
+        extras,
+    )
 
     # ---------------------------------------------------------------------
     # NOTE(kgriffs): 'http' scope
@@ -694,10 +744,10 @@ async def _simulate_request_asgi(
         content_length=content_length,
     )
 
-    if 'method' in extras and extras['method'] != method.upper():
+    if "method" in extras and extras["method"] != method.upper():
         raise ValueError(
-            'ASGI scope extras may not override the request method. '
-            'Please use the method parameter.'
+            "ASGI scope extras may not override the request method. "
+            "Please use the method parameter."
         )
 
     http_scope.update(extras)
@@ -705,7 +755,7 @@ async def _simulate_request_asgi(
 
     disconnect_at = time.time() + max(0, asgi_disconnect_ttl)
     req_event_emitter = helpers.ASGIRequestEventEmitter(
-        (body or b''),
+        (body or b""),
         chunk_size=asgi_chunk_size,
         disconnect_at=disconnect_at,
     )
@@ -722,26 +772,30 @@ async def _simulate_request_asgi(
             while not resp_event_collector.status:
                 await asyncio.sleep(0)
 
-            return StreamedResult(resp_event_collector.body_chunks,
-                                  code_to_http_status(resp_event_collector.status),
-                                  resp_event_collector.headers,
-                                  task_req,
-                                  req_event_emitter)
+            return StreamedResult(
+                resp_event_collector.body_chunks,
+                code_to_http_status(resp_event_collector.status),
+                resp_event_collector.headers,
+                task_req,
+                req_event_emitter,
+            )
 
         req_event_emitter.disconnect()
         await task_req
-        return Result(resp_event_collector.body_chunks,
-                      code_to_http_status(resp_event_collector.status),
-                      resp_event_collector.headers)
+        return Result(
+            resp_event_collector.body_chunks,
+            code_to_http_status(resp_event_collector.status),
+            resp_event_collector.headers,
+        )
 
     # ---------------------------------------------------------------------
     # NOTE(kgriffs): 'lifespan' scope
     # ---------------------------------------------------------------------
     lifespan_scope = {
-        'type': ScopeType.LIFESPAN,
-        'asgi': {
-            'version': '3.0',
-            'spec_version': '2.0',
+        "type": ScopeType.LIFESPAN,
+        "asgi": {
+            "version": "3.0",
+            "spec_version": "2.0",
         },
     }
 
@@ -774,9 +828,11 @@ async def _simulate_request_asgi(
 
     await conductor()
 
-    return Result(resp_event_collector.body_chunks,
-                  code_to_http_status(resp_event_collector.status),
-                  resp_event_collector.headers)
+    return Result(
+        resp_event_collector.body_chunks,
+        code_to_http_status(resp_event_collector.status),
+        resp_event_collector.headers,
+    )
 
 
 class ASGIConductor:
@@ -855,9 +911,10 @@ class ASGIConductor:
         app: The app that this client instance was configured to use.
 
     """
+
     def __init__(self, app, headers=None):
         if not _is_asgi_app(app):
-            raise CompatibilityError('ASGIConductor may only be used with an ASGI app')
+            raise CompatibilityError("ASGIConductor may only be used with an ASGI app")
 
         self.app = app
         self._default_headers = headers
@@ -868,10 +925,10 @@ class ASGIConductor:
 
     async def __aenter__(self):
         lifespan_scope = {
-            'type': ScopeType.LIFESPAN,
-            'asgi': {
-                'version': '3.0',
-                'spec_version': '2.0',
+            "type": ScopeType.LIFESPAN,
+            "asgi": {
+                "version": "3.0",
+                "spec_version": "2.0",
             },
         }
 
@@ -881,7 +938,9 @@ class ASGIConductor:
         #   the lifespan protocol and thus we do not need to catch
         #   exceptions that would signify no lifespan protocol support.
         self._lifespan_task = get_running_loop().create_task(
-            self.app(lifespan_scope, lifespan_event_emitter, self._lifespan_event_collector)
+            self.app(
+                lifespan_scope, lifespan_event_emitter, self._lifespan_event_collector
+            )
         )
 
         await _wait_for_startup(self._lifespan_event_collector.events)
@@ -902,14 +961,14 @@ class ASGIConductor:
 
         return True
 
-    async def simulate_get(self, path='/', **kwargs) -> _ResultBase:
+    async def simulate_get(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a GET request to an ASGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_get`)
         """
-        return await self.simulate_request('GET', path, **kwargs)
+        return await self.simulate_request("GET", path, **kwargs)
 
-    def simulate_get_stream(self, path='/', **kwargs):
+    def simulate_get_stream(self, path="/", **kwargs):
         """Simulate a GET request to an ASGI application with a streamed response.
 
         This method returns a context manager that can be used to obtain
@@ -936,51 +995,51 @@ class ASGIConductor:
 
         """
 
-        kwargs['_stream_result'] = True
+        kwargs["_stream_result"] = True
 
-        return _AsyncContextManager(self.simulate_request('GET', path, **kwargs))
+        return _AsyncContextManager(self.simulate_request("GET", path, **kwargs))
 
-    async def simulate_head(self, path='/', **kwargs) -> _ResultBase:
+    async def simulate_head(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a HEAD request to an ASGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_head`)
         """
-        return await self.simulate_request('HEAD', path, **kwargs)
+        return await self.simulate_request("HEAD", path, **kwargs)
 
-    async def simulate_post(self, path='/', **kwargs) -> _ResultBase:
+    async def simulate_post(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a POST request to an ASGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_post`)
         """
-        return await self.simulate_request('POST', path, **kwargs)
+        return await self.simulate_request("POST", path, **kwargs)
 
-    async def simulate_put(self, path='/', **kwargs) -> _ResultBase:
+    async def simulate_put(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a PUT request to an ASGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_put`)
         """
-        return await self.simulate_request('PUT', path, **kwargs)
+        return await self.simulate_request("PUT", path, **kwargs)
 
-    async def simulate_options(self, path='/', **kwargs) -> _ResultBase:
+    async def simulate_options(self, path="/", **kwargs) -> _ResultBase:
         """Simulate an OPTIONS request to an ASGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_options`)
         """
-        return await self.simulate_request('OPTIONS', path, **kwargs)
+        return await self.simulate_request("OPTIONS", path, **kwargs)
 
-    async def simulate_patch(self, path='/', **kwargs) -> _ResultBase:
+    async def simulate_patch(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a PATCH request to an ASGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_patch`)
         """
-        return await self.simulate_request('PATCH', path, **kwargs)
+        return await self.simulate_request("PATCH", path, **kwargs)
 
-    async def simulate_delete(self, path='/', **kwargs) -> _ResultBase:
+    async def simulate_delete(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a DELETE request to an ASGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_delete`)
         """
-        return await self.simulate_request('DELETE', path, **kwargs)
+        return await self.simulate_request("DELETE", path, **kwargs)
 
     async def simulate_request(self, *args, **kwargs) -> _ResultBase:
         """Simulate a request to an ASGI application.
@@ -994,15 +1053,15 @@ class ASGIConductor:
         if self._default_headers:
             # NOTE(kgriffs): Handle the case in which headers is explicitly
             # set to None.
-            additional_headers = kwargs.get('headers', {}) or {}
+            additional_headers = kwargs.get("headers", {}) or {}
 
             merged_headers = self._default_headers.copy()
             merged_headers.update(additional_headers)
 
-            kwargs['headers'] = merged_headers
+            kwargs["headers"] = merged_headers
 
         # NOTE(kgriffs): The conductor takes care of startup/shutdown
-        kwargs['_one_shot'] = False
+        kwargs["_one_shot"] = False
 
         return await _simulate_request_asgi(self.app, *args, **kwargs)
 
@@ -1100,7 +1159,7 @@ def simulate_get(app, path, **kwargs) -> _ResultBase:
         :py:class:`~.Result`: The result of the request
     """
 
-    return simulate_request(app, 'GET', path, **kwargs)
+    return simulate_request(app, "GET", path, **kwargs)
 
 
 def simulate_head(app, path, **kwargs) -> _ResultBase:
@@ -1190,7 +1249,7 @@ def simulate_head(app, path, **kwargs) -> _ResultBase:
     Returns:
         :py:class:`~.Result`: The result of the request
     """
-    return simulate_request(app, 'HEAD', path, **kwargs)
+    return simulate_request(app, "HEAD", path, **kwargs)
 
 
 def simulate_post(app, path, **kwargs) -> _ResultBase:
@@ -1294,7 +1353,7 @@ def simulate_post(app, path, **kwargs) -> _ResultBase:
     Returns:
         :py:class:`~.Result`: The result of the request
     """
-    return simulate_request(app, 'POST', path, **kwargs)
+    return simulate_request(app, "POST", path, **kwargs)
 
 
 def simulate_put(app, path, **kwargs) -> _ResultBase:
@@ -1398,7 +1457,7 @@ def simulate_put(app, path, **kwargs) -> _ResultBase:
     Returns:
         :py:class:`~.Result`: The result of the request
     """
-    return simulate_request(app, 'PUT', path, **kwargs)
+    return simulate_request(app, "PUT", path, **kwargs)
 
 
 def simulate_options(app, path, **kwargs) -> _ResultBase:
@@ -1480,7 +1539,7 @@ def simulate_options(app, path, **kwargs) -> _ResultBase:
     Returns:
         :py:class:`~.Result`: The result of the request
     """
-    return simulate_request(app, 'OPTIONS', path, **kwargs)
+    return simulate_request(app, "OPTIONS", path, **kwargs)
 
 
 def simulate_patch(app, path, **kwargs) -> _ResultBase:
@@ -1579,7 +1638,7 @@ def simulate_patch(app, path, **kwargs) -> _ResultBase:
     Returns:
         :py:class:`~.Result`: The result of the request
     """
-    return simulate_request(app, 'PATCH', path, **kwargs)
+    return simulate_request(app, "PATCH", path, **kwargs)
 
 
 def simulate_delete(app, path, **kwargs) -> _ResultBase:
@@ -1678,7 +1737,7 @@ def simulate_delete(app, path, **kwargs) -> _ResultBase:
     Returns:
         :py:class:`~.Result`: The result of the request
     """
-    return simulate_request(app, 'DELETE', path, **kwargs)
+    return simulate_request(app, "DELETE", path, **kwargs)
 
 
 class TestClient:
@@ -1743,7 +1802,7 @@ class TestClient:
     async def __aenter__(self):
         if not _is_asgi_app(self.app):
             raise CompatibilityError(
-                'a conductor context manager may only be used with a Falcon ASGI app'
+                "a conductor context manager may only be used with a Falcon ASGI app"
             )
 
         # NOTE(kgriffs): We normally do not expect someone to try to nest
@@ -1764,54 +1823,54 @@ class TestClient:
 
         return result
 
-    def simulate_get(self, path='/', **kwargs) -> _ResultBase:
+    def simulate_get(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a GET request to a WSGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_get`)
         """
-        return self.simulate_request('GET', path, **kwargs)
+        return self.simulate_request("GET", path, **kwargs)
 
-    def simulate_head(self, path='/', **kwargs) -> _ResultBase:
+    def simulate_head(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a HEAD request to a WSGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_head`)
         """
-        return self.simulate_request('HEAD', path, **kwargs)
+        return self.simulate_request("HEAD", path, **kwargs)
 
-    def simulate_post(self, path='/', **kwargs) -> _ResultBase:
+    def simulate_post(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a POST request to a WSGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_post`)
         """
-        return self.simulate_request('POST', path, **kwargs)
+        return self.simulate_request("POST", path, **kwargs)
 
-    def simulate_put(self, path='/', **kwargs) -> _ResultBase:
+    def simulate_put(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a PUT request to a WSGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_put`)
         """
-        return self.simulate_request('PUT', path, **kwargs)
+        return self.simulate_request("PUT", path, **kwargs)
 
-    def simulate_options(self, path='/', **kwargs) -> _ResultBase:
+    def simulate_options(self, path="/", **kwargs) -> _ResultBase:
         """Simulate an OPTIONS request to a WSGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_options`)
         """
-        return self.simulate_request('OPTIONS', path, **kwargs)
+        return self.simulate_request("OPTIONS", path, **kwargs)
 
-    def simulate_patch(self, path='/', **kwargs) -> _ResultBase:
+    def simulate_patch(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a PATCH request to a WSGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_patch`)
         """
-        return self.simulate_request('PATCH', path, **kwargs)
+        return self.simulate_request("PATCH", path, **kwargs)
 
-    def simulate_delete(self, path='/', **kwargs) -> _ResultBase:
+    def simulate_delete(self, path="/", **kwargs) -> _ResultBase:
         """Simulate a DELETE request to a WSGI application.
 
         (See also: :py:meth:`falcon.testing.simulate_delete`)
         """
-        return self.simulate_request('DELETE', path, **kwargs)
+        return self.simulate_request("DELETE", path, **kwargs)
 
     def simulate_request(self, *args, **kwargs) -> _ResultBase:
         """Simulate a request to a WSGI application.
@@ -1825,12 +1884,12 @@ class TestClient:
         if self._default_headers:
             # NOTE(kgriffs): Handle the case in which headers is explicitly
             # set to None.
-            additional_headers = kwargs.get('headers', {}) or {}
+            additional_headers = kwargs.get("headers", {}) or {}
 
             merged_headers = self._default_headers.copy()
             merged_headers.update(additional_headers)
 
-            kwargs['headers'] = merged_headers
+            kwargs["headers"] = merged_headers
 
         return simulate_request(self.app, *args, **kwargs)
 
@@ -1855,28 +1914,20 @@ class _AsyncContextManager:
 
 
 def _prepare_sim_args(
-    path,
-    query_string,
-    params,
-    params_csv,
-    content_type,
-    headers,
-    body,
-    json,
-    extras
+    path, query_string, params, params_csv, content_type, headers, body, json, extras
 ):
-    if not path.startswith('/'):
+    if not path.startswith("/"):
         raise ValueError("path must start with '/'")
 
-    if '?' in path:
+    if "?" in path:
         if query_string or params:
             raise ValueError(
-                'path may not contain a query string in combination with '
-                'the query_string or params parameters. Please use only one '
-                'way of specifying the query string.'
+                "path may not contain a query string in combination with "
+                "the query_string or params parameters. Please use only one "
+                "way of specifying the query string."
             )
-        path, query_string = path.split('?', 1)
-    elif query_string and query_string.startswith('?'):
+        path, query_string = path.split("?", 1)
+    elif query_string and query_string.startswith("?"):
         raise ValueError("query_string should not start with '?'")
 
     extras = extras or {}
@@ -1890,12 +1941,12 @@ def _prepare_sim_args(
 
     if content_type is not None:
         headers = headers or {}
-        headers['Content-Type'] = content_type
+        headers["Content-Type"] = content_type
 
     if json is not None:
         body = util_json.dumps(json, ensure_ascii=False)
         headers = headers or {}
-        headers['Content-Type'] = MEDIA_JSON
+        headers["Content-Type"] = MEDIA_JSON
 
     return path, query_string, headers, body, extras
 
@@ -1907,10 +1958,10 @@ def _is_asgi_app(app):
     # NOTE(kgriffs): Technically someone could name the "self" or "cls"
     #   arg something else, but we will make the simplifying
     #   assumption that this is rare enough to not worry about.
-    if app_args[0] in {'cls', 'self'}:
+    if app_args[0] in {"cls", "self"}:
         num_app_args -= 1
 
-    is_asgi = (num_app_args == 3)
+    is_asgi = num_app_args == 3
 
     return is_asgi
 
@@ -1920,10 +1971,12 @@ async def _wait_for_startup(events):
     #   understand `while True`.
     while True:  # pragma: nocover
         for e in events:
-            if e['type'] == 'lifespan.startup.failed':
-                raise RuntimeError('ASGI app returned lifespan.startup.failed. ' + e['message'])
+            if e["type"] == "lifespan.startup.failed":
+                raise RuntimeError(
+                    "ASGI app returned lifespan.startup.failed. " + e["message"]
+                )
 
-        if any(e['type'] == 'lifespan.startup.complete' for e in events):
+        if any(e["type"] == "lifespan.startup.complete" for e in events):
             break
 
         # NOTE(kgriffs): Yield to the concurrent lifespan task
@@ -1935,10 +1988,12 @@ async def _wait_for_shutdown(events):
     #   understand `while True`.
     while True:  # pragma: nocover
         for e in events:
-            if e['type'] == 'lifespan.shutdown.failed':
-                raise RuntimeError('ASGI app returned lifespan.shutdown.failed. ' + e['message'])
+            if e["type"] == "lifespan.shutdown.failed":
+                raise RuntimeError(
+                    "ASGI app returned lifespan.shutdown.failed. " + e["message"]
+                )
 
-        if any(e['type'] == 'lifespan.shutdown.complete' for e in events):
+        if any(e["type"] == "lifespan.shutdown.complete" for e in events):
             break
 
         # NOTE(kgriffs): Yield to the concurrent lifespan task
