@@ -37,23 +37,22 @@ except ImportError:
 
 
 # NOTE(kgriffs): See also RFC 3986
-_UNRESERVED = ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-               'abcdefghijklmnopqrstuvwxyz'
-               '0123456789'
-               '-._~')
+_UNRESERVED = (
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "abcdefghijklmnopqrstuvwxyz" "0123456789" "-._~"
+)
 
 # NOTE(kgriffs): See also RFC 3986
 _DELIMITERS = ":/?#[]@!$&'()*+,;="
 _ALL_ALLOWED = _UNRESERVED + _DELIMITERS
 
-_HEX_DIGITS = '0123456789ABCDEFabcdef'
+_HEX_DIGITS = "0123456789ABCDEFabcdef"
 
 # This map construction is based on urllib's implementation
-_HEX_TO_BYTE = {(a + b).encode(): bytes([int(a + b, 16)])
-                    for a in _HEX_DIGITS
-                    for b in _HEX_DIGITS}
+_HEX_TO_BYTE = {
+    (a + b).encode(): bytes([int(a + b, 16)]) for a in _HEX_DIGITS for b in _HEX_DIGITS
+}
 
-_PYPY = platform.python_implementation() == 'PyPy'
+_PYPY = platform.python_implementation() == "PyPy"
 
 
 def _create_char_encoder(allowed_chars):
@@ -64,7 +63,7 @@ def _create_char_encoder(allowed_chars):
         if chr(code_point) in allowed_chars:
             encoded_char = chr(code_point)
         else:
-            encoded_char = '%{0:02X}'.format(code_point)
+            encoded_char = "%{0:02X}".format(code_point)
 
         lookup[code_point] = encoded_char
 
@@ -74,7 +73,7 @@ def _create_char_encoder(allowed_chars):
 def _create_str_encoder(is_value):
 
     allowed_chars = _UNRESERVED if is_value else _ALL_ALLOWED
-    allowed_chars_plus_percent = allowed_chars + '%'
+    allowed_chars_plus_percent = allowed_chars + "%"
     encode_char = _create_char_encoder(allowed_chars)
 
     def encoder(uri):
@@ -85,15 +84,14 @@ def _create_str_encoder(is_value):
         if not uri.rstrip(allowed_chars_plus_percent):
             # NOTE(kgriffs): There's a good chance the string has already
             # been escaped. Do one more check to increase our certainty.
-            tokens = uri.split('%')
+            tokens = uri.split("%")
             for token in tokens[1:]:
                 hex_octet = token[:2]
 
                 if not len(hex_octet) == 2:
                     break
 
-                if not (hex_octet[0] in _HEX_DIGITS and
-                        hex_octet[1] in _HEX_DIGITS):
+                if not (hex_octet[0] in _HEX_DIGITS and hex_octet[1] in _HEX_DIGITS):
                     break
             else:
                 # NOTE(kgriffs): All percent-encoded sequences were
@@ -107,7 +105,7 @@ def _create_str_encoder(is_value):
             # partially encoded, the caller will need to normalize it
             # before passing it in here.
 
-        uri = uri.encode('utf-8')
+        uri = uri.encode("utf-8")
 
         # Use our map to encode each char and join the result into a new uri
         #
@@ -115,13 +113,13 @@ def _create_str_encoder(is_value):
         # CPython 3 (tested on CPython 3.5 and 3.7). A list comprehension
         # can be faster on PyPy3, but the difference is on the order of
         # nanoseconds in that case, so we aren't going to worry about it.
-        return ''.join(map(encode_char, uri))
+        return "".join(map(encode_char, uri))
 
     return encoder
 
 
 encode = _create_str_encoder(False)
-encode.__name__ = 'encode'
+encode.__name__ = "encode"
 encode.__doc__ = """Encodes a full or relative URI according to RFC 3986.
 
 RFC 3986 defines a set of "unreserved" characters as well as a
@@ -144,7 +142,7 @@ Returns:
 
 
 encode_value = _create_str_encoder(True)
-encode_value.name = 'encode_value'
+encode_value.name = "encode_value"
 encode_value.__doc__ = """Encodes a value string according to RFC 3986.
 
 Disallowed characters are percent-encoded in a way that models
@@ -180,10 +178,10 @@ def _join_tokens_bytearray(tokens):
             decoded_uri += _HEX_TO_BYTE[token_partial] + token[2:]
         except KeyError:
             # malformed percentage like "x=%" or "y=%+"
-            decoded_uri += b'%' + token
+            decoded_uri += b"%" + token
 
     # Convert back to str
-    return decoded_uri.decode('utf-8', 'replace')
+    return decoded_uri.decode("utf-8", "replace")
 
 
 def _join_tokens_list(tokens):
@@ -200,10 +198,10 @@ def _join_tokens_list(tokens):
             decoded.append(_HEX_TO_BYTE[token_partial] + token[2:])
         except KeyError:
             # malformed percentage like "x=%" or "y=%+"
-            decoded.append(b'%' + token)
+            decoded.append(b"%" + token)
 
     # Convert back to str
-    return b''.join(decoded).decode('utf-8', 'replace')
+    return b"".join(decoded).decode("utf-8", "replace")
 
 
 # PERF(vytas): The best method to join many byte strings depends on the Python
@@ -244,21 +242,21 @@ def decode(encoded_uri, unquote_plus=True):
 
     # PERF(kgriffs): Don't take the time to instantiate a new
     # string unless we have to.
-    if '+' in decoded_uri and unquote_plus:
-        decoded_uri = decoded_uri.replace('+', ' ')
+    if "+" in decoded_uri and unquote_plus:
+        decoded_uri = decoded_uri.replace("+", " ")
 
     # Short-circuit if we can
-    if '%' not in decoded_uri:
+    if "%" not in decoded_uri:
         return decoded_uri
 
     # NOTE(kgriffs): Clients should never submit a URI that has
     # unescaped non-ASCII chars in them, but just in case they
     # do, let's encode into a non-lossy format.
-    decoded_uri = decoded_uri.encode('utf-8')
+    decoded_uri = decoded_uri.encode("utf-8")
 
     # PERF(kgriffs): This was found to be faster than using
     # a regex sub call or list comprehension with a join.
-    tokens = decoded_uri.split(b'%')
+    tokens = decoded_uri.split(b"%")
     # PERF(vytas): Just use in-place add for a low number of items:
     if len(tokens) < 8:
         decoded_uri = tokens[0]
@@ -268,10 +266,10 @@ def decode(encoded_uri, unquote_plus=True):
                 decoded_uri += _HEX_TO_BYTE[token_partial] + token[2:]
             except KeyError:
                 # malformed percentage like "x=%" or "y=%+"
-                decoded_uri += b'%' + token
+                decoded_uri += b"%" + token
 
         # Convert back to str
-        return decoded_uri.decode('utf-8', 'replace')
+        return decoded_uri.decode("utf-8", "replace")
 
     # NOTE(vytas): Decode percent-encoded bytestring fragments and join them
     # back to a string using the platform-dependent method.
@@ -324,12 +322,12 @@ def parse_query_string(query_string, keep_blank=False, csv=True):
 
     params = {}
 
-    is_encoded = '+' in query_string or '%' in query_string
+    is_encoded = "+" in query_string or "%" in query_string
 
     # PERF(kgriffs): This was found to be faster than using a regex, for
     # both short and long query strings. Tested on CPython 3.4.
-    for field in query_string.split('&'):
-        k, _, v = field.partition('=')
+    for field in query_string.split("&"):
+        k, _, v = field.partition("=")
         if not v and (not keep_blank or not k):
             continue
 
@@ -355,13 +353,13 @@ def parse_query_string(query_string, keep_blank=False, csv=True):
                 params[k] = [old_value, v]
 
         else:
-            if csv and ',' in v:
+            if csv and "," in v:
                 # NOTE(kgriffs): Falcon supports a more compact form of
                 # lists, in which the elements are comma-separated and
                 # assigned to a single param instance. If it turns out that
                 # very few people use this, it can be deprecated at some
                 # point.
-                v = v.split(',')
+                v = v.split(",")
 
                 if not keep_blank:
                     # NOTE(kgriffs): Normalize the result in the case that
@@ -409,23 +407,23 @@ def parse_host(host, default_port=None):
     # or as a domain name, and in the case of IPv6 there
     # may be multiple colons in the string.
 
-    if host.startswith('['):
+    if host.startswith("["):
         # IPv6 address with a port
-        pos = host.rfind(']:')
+        pos = host.rfind("]:")
         if pos != -1:
-            return (host[1:pos], int(host[pos + 2:]))
+            return (host[1:pos], int(host[pos + 2 :]))
         else:
             return (host[1:-1], default_port)
 
-    pos = host.rfind(':')
-    if (pos == -1) or (pos != host.find(':')):
+    pos = host.rfind(":")
+    if (pos == -1) or (pos != host.find(":")):
         # Bare domain name or IP address
         return (host, default_port)
 
     # NOTE(kgriffs): At this point we know that there was
     # only a single colon, so we should have an IPv4 address
     # or a domain name plus a port
-    name, _, port = host.partition(':')
+    name, _, port = host.partition(":")
     return (name, int(port))
 
 
@@ -453,13 +451,12 @@ def unquote_string(quoted):
     # PERF(philiptzou): Most header strings don't contain "quoted-pair" which
     # defined by RFC 7320. We use this little trick (quick string search) to
     # speed up string parsing by preventing unnecessary processes if possible.
-    if '\\' not in tmp_quoted:
+    if "\\" not in tmp_quoted:
         return tmp_quoted
-    elif r'\\' not in tmp_quoted:
-        return tmp_quoted.replace('\\', '')
+    elif r"\\" not in tmp_quoted:
+        return tmp_quoted.replace("\\", "")
     else:
-        return '\\'.join([q.replace('\\', '')
-                          for q in tmp_quoted.split(r'\\')])
+        return "\\".join([q.replace("\\", "") for q in tmp_quoted.split(r"\\")])
 
 
 # TODO(vytas): Restructure this in favour of a cleaner way to hoist the pure
@@ -469,10 +466,10 @@ parse_query_string = _cy_parse_query_string or parse_query_string  # NOQA
 
 
 __all__ = [
-    'decode',
-    'encode',
-    'encode_value',
-    'parse_host',
-    'parse_query_string',
-    'unquote_string',
+    "decode",
+    "encode",
+    "encode_value",
+    "parse_host",
+    "parse_query_string",
+    "unquote_string",
 ]
