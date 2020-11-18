@@ -1,4 +1,3 @@
-import random
 
 import pecan
 from pecan import expose, response, request
