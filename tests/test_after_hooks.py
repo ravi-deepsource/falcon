@@ -24,7 +24,7 @@ def client(asgi):
     app = create_app(asgi)
 
     resource = WrappedRespondersResourceAsync() if asgi else WrappedRespondersResource()
-    app.add_route('/', resource)
+    app.add_route("/", resource)
 
     return testing.TestClient(app)
 
@@ -36,7 +36,7 @@ def client(asgi):
 
 def validate_output(req, resp, resource):
     assert resource
-    raise falcon.HTTPError(falcon.HTTP_723, title='Tricky')
+    raise falcon.HTTPError(falcon.HTTP_723, title="Tricky")
 
 
 def serialize_body(req, resp, resource):
@@ -46,19 +46,19 @@ def serialize_body(req, resp, resource):
     if body is not None:
         resp.body = json.dumps(body)
     else:
-        resp.body = 'Nothing to see here. Move along.'
+        resp.body = "Nothing to see here. Move along."
 
 
 async def serialize_body_async(*args):
     return serialize_body(*args)
 
 
-def fluffiness(req, resp, resource, animal=''):
+def fluffiness(req, resp, resource, animal=""):
     assert resource
 
-    resp.body = 'fluffy'
+    resp.body = "fluffy"
     if animal:
-        resp.set_header('X-Animal', animal)
+        resp.set_header("X-Animal", animal)
 
 
 class ResourceAwareFluffiness:
@@ -66,7 +66,7 @@ class ResourceAwareFluffiness:
         fluffiness(req, resp, resource)
 
 
-def cuteness(req, resp, resource, check, postfix=' and cute'):
+def cuteness(req, resp, resource, check, postfix=" and cute"):
     assert resource
     if resp.body == check:
         resp.body += postfix
@@ -74,16 +74,16 @@ def cuteness(req, resp, resource, check, postfix=' and cute'):
 
 def resource_aware_cuteness(req, resp, resource):
     assert resource
-    cuteness(req, resp, resource, 'fluffy')
+    cuteness(req, resp, resource, "fluffy")
 
 
 class Smartness:
     def __call__(self, req, resp, resource):
         assert resource
         if resp.body:
-            resp.body += ' and smart'
+            resp.body += " and smart"
         else:
-            resp.body = 'smart'
+            resp.body = "smart"
 
 
 # NOTE(kgriffs): Use partial methods for these next two in order
@@ -93,16 +93,14 @@ def things_in_the_head(header, value, req, resp, resource):
     resp.set_header(header, value)
 
 
-bunnies_in_the_head = functools.partial(things_in_the_head,
-                                        'X-Bunnies', 'fluffy')
+bunnies_in_the_head = functools.partial(things_in_the_head, "X-Bunnies", "fluffy")
 
 
-cuteness_in_the_head = functools.partial(things_in_the_head,
-                                         'X-Cuteness', 'cute')
+cuteness_in_the_head = functools.partial(things_in_the_head, "X-Cuteness", "cute")
 
 
-def fluffiness_in_the_head(req, resp, resource, value='fluffy'):
-    resp.set_header('X-Fluffiness', value)
+def fluffiness_in_the_head(req, resp, resource, value="fluffy"):
+    resp.set_header("X-Fluffiness", value)
 
 
 # --------------------------------------------------------------------
@@ -111,7 +109,6 @@ def fluffiness_in_the_head(req, resp, resource, value='fluffy'):
 
 
 class WrappedRespondersResource:
-
     @falcon.after(serialize_body)
     @falcon.after(validate_output)
     def on_get(self, req, resp):
@@ -122,7 +119,7 @@ class WrappedRespondersResource:
     def on_put(self, req, resp):
         self.req = req
         self.resp = resp
-        resp.body = {'animal': 'falcon'}
+        resp.body = {"animal": "falcon"}
 
     @falcon.after(Smartness())
     def on_post(self, req, resp):
@@ -130,7 +127,6 @@ class WrappedRespondersResource:
 
 
 class WrappedRespondersResourceAsync:
-
     @falcon.after(serialize_body_async)
     @falcon.after(validate_output, is_async=False)
     async def on_get(self, req, resp):
@@ -141,15 +137,15 @@ class WrappedRespondersResourceAsync:
     async def on_put(self, req, resp):
         self.req = req
         self.resp = resp
-        resp.body = {'animal': 'falcon'}
+        resp.body = {"animal": "falcon"}
 
     @falcon.after(Smartness())
     async def on_post(self, req, resp):
         pass
 
 
-@falcon.after(cuteness, 'fluffy', postfix=' and innocent')
-@falcon.after(fluffiness, 'kitten')
+@falcon.after(cuteness, "fluffy", postfix=" and innocent")
+@falcon.after(fluffiness, "kitten")
 class WrappedClassResource:
 
     # Test that the decorator skips non-callables
@@ -175,28 +171,22 @@ class WrappedClassResourceChild(WrappedClassResource):
 
 
 class ClassResourceWithURIFields:
-
-    @falcon.after(fluffiness_in_the_head, 'fluffy')
+    @falcon.after(fluffiness_in_the_head, "fluffy")
     def on_get(self, req, resp, field1, field2):
         self.fields = (field1, field2)
 
 
 class ClassResourceWithURIFieldsAsync:
-
-    @falcon.after(fluffiness_in_the_head, 'fluffy')
+    @falcon.after(fluffiness_in_the_head, "fluffy")
     async def on_get(self, req, resp, field1, field2):
         self.fields = (field1, field2)
 
 
 class ClassResourceWithURIFieldsChild(ClassResourceWithURIFields):
-
     def on_get(self, req, resp, field1, field2):
         # Test passing mixed args and kwargs
         super(ClassResourceWithURIFieldsChild, self).on_get(
-            req,
-            resp,
-            field1,
-            field2=field2
+            req, resp, field1, field2=field2
         )
 
 
@@ -243,48 +233,44 @@ class ClassResourceWithAwareHooks:
 def test_output_validator(client):
     result = client.simulate_get()
     assert result.status_code == 723
-    assert result.text == json.dumps({'title': 'Tricky'})
+    assert result.text == json.dumps({"title": "Tricky"})
 
 
 def test_serializer(client):
     result = client.simulate_put()
-    assert result.text == json.dumps({'animal': 'falcon'})
+    assert result.text == json.dumps({"animal": "falcon"})
 
 
 def test_hook_as_callable_class(client):
     result = client.simulate_post()
-    assert 'smart' == result.text
+    assert "smart" == result.text
 
 
 @pytest.mark.parametrize(
-    'resource',
-    [
-        ClassResourceWithURIFields(),
-        ClassResourceWithURIFieldsChild()
-    ]
+    "resource", [ClassResourceWithURIFields(), ClassResourceWithURIFieldsChild()]
 )
 def test_resource_with_uri_fields(client, resource):
-    client.app.add_route('/{field1}/{field2}', resource)
+    client.app.add_route("/{field1}/{field2}", resource)
 
-    result = client.simulate_get('/82074/58927')
+    result = client.simulate_get("/82074/58927")
 
     assert result.status_code == 200
-    assert result.headers['X-Fluffiness'] == 'fluffy'
-    assert 'X-Cuteness' not in result.headers
-    assert resource.fields == ('82074', '58927')
+    assert result.headers["X-Fluffiness"] == "fluffy"
+    assert "X-Cuteness" not in result.headers
+    assert resource.fields == ("82074", "58927")
 
 
 def test_resource_with_uri_fields_async():
     app = create_app(asgi=True)
 
     resource = ClassResourceWithURIFieldsAsync()
-    app.add_route('/{field1}/{field2}', resource)
+    app.add_route("/{field1}/{field2}", resource)
 
-    result = testing.simulate_get(app, '/a/b')
+    result = testing.simulate_get(app, "/a/b")
 
     assert result.status_code == 200
-    assert result.headers['X-Fluffiness'] == 'fluffy'
-    assert resource.fields == ('a', 'b')
+    assert result.headers["X-Fluffiness"] == "fluffy"
+    assert resource.fields == ("a", "b")
 
     async def test_direct():
         resource = ClassResourceWithURIFieldsAsync()
@@ -292,50 +278,46 @@ def test_resource_with_uri_fields_async():
         req = testing.create_asgi_req()
         resp = create_resp(True)
 
-        await resource.on_get(req, resp, '1', '2')
-        assert resource.fields == ('1', '2')
+        await resource.on_get(req, resp, "1", "2")
+        assert resource.fields == ("1", "2")
 
     falcon.invoke_coroutine_sync(test_direct)
 
 
 @pytest.mark.parametrize(
-    'resource',
-    [
-        WrappedClassResource(),
-        WrappedClassResourceChild()
-    ]
+    "resource", [WrappedClassResource(), WrappedClassResourceChild()]
 )
 def test_wrapped_resource(client, resource):
-    client.app.add_route('/wrapped', resource)
-    result = client.simulate_get('/wrapped')
+    client.app.add_route("/wrapped", resource)
+    result = client.simulate_get("/wrapped")
     assert result.status_code == 200
-    assert result.text == 'fluffy and innocent'
-    assert result.headers['X-Animal'] == 'kitten'
+    assert result.text == "fluffy and innocent"
+    assert result.headers["X-Animal"] == "kitten"
 
-    result = client.simulate_head('/wrapped')
+    result = client.simulate_head("/wrapped")
     assert result.status_code == 200
-    assert result.headers['X-Fluffiness'] == 'fluffy'
-    assert result.headers['X-Cuteness'] == 'cute'
-    assert result.headers['X-Animal'] == 'kitten'
+    assert result.headers["X-Fluffiness"] == "fluffy"
+    assert result.headers["X-Cuteness"] == "cute"
+    assert result.headers["X-Animal"] == "kitten"
 
-    result = client.simulate_post('/wrapped')
+    result = client.simulate_post("/wrapped")
     assert result.status_code == 405
 
-    result = client.simulate_patch('/wrapped')
+    result = client.simulate_patch("/wrapped")
     assert result.status_code == 405
 
     # Decorator should not affect the default on_options responder
-    result = client.simulate_options('/wrapped')
+    result = client.simulate_options("/wrapped")
     assert result.status_code == 200
     assert not result.text
-    assert 'X-Animal' not in result.headers
+    assert "X-Animal" not in result.headers
 
 
 def test_wrapped_resource_with_hooks_aware_of_resource(client, wrapped_resource_aware):
-    client.app.add_route('/wrapped_aware', wrapped_resource_aware)
-    expected = 'fluffy and cute'
+    client.app.add_route("/wrapped_aware", wrapped_resource_aware)
+    expected = "fluffy and cute"
 
-    result = client.simulate_get('/wrapped_aware')
+    result = client.simulate_get("/wrapped_aware")
     assert result.status_code == 200
     assert expected == result.text
 
@@ -344,37 +326,37 @@ def test_wrapped_resource_with_hooks_aware_of_resource(client, wrapped_resource_
         client.simulate_put,
         client.simulate_post,
     ):
-        result = test(path='/wrapped_aware')
+        result = test(path="/wrapped_aware")
         assert result.status_code == 200
         assert wrapped_resource_aware.resp.body == expected
 
-    result = client.simulate_patch('/wrapped_aware')
+    result = client.simulate_patch("/wrapped_aware")
     assert result.status_code == 405
 
     # Decorator should not affect the default on_options responder
-    result = client.simulate_options('/wrapped_aware')
+    result = client.simulate_options("/wrapped_aware")
     assert result.status_code == 200
     assert not result.text
 
 
 class ResourceAwareGameHook:
 
-    VALUES = ('rock', 'scissors', 'paper')
+    VALUES = ("rock", "scissors", "paper")
 
     @classmethod
     def __call__(cls, req, resp, resource):
         assert resource
         assert resource.seed in cls.VALUES
-        assert resp.text == 'Responder called.'
+        assert resp.text == "Responder called."
 
-        header = resp.get_header('X-Hook-Game')
-        values = header.split(', ') if header else []
+        header = resp.get_header("X-Hook-Game")
+        values = header.split(", ") if header else []
         if values:
             last = cls.VALUES.index(values[-1])
             values.append(cls.VALUES[(last + 1) % len(cls.VALUES)])
         else:
             values.append(resource.seed)
-        resp.set_header('X-Hook-Game', ', '.join(values))
+        resp.set_header("X-Hook-Game", ", ".join(values))
 
 
 _game_hook = ResourceAwareGameHook()
@@ -383,29 +365,28 @@ _game_hook = ResourceAwareGameHook()
 @falcon.after(_game_hook)
 @falcon.after(_game_hook)
 class HandGame:
-
     def __init__(self):
         self.seed = None
 
     @falcon.after(_game_hook)
     def on_put(self, req, resp):
         self.seed = req.media
-        resp.text = 'Responder called.'
+        resp.text = "Responder called."
 
     @falcon.after(_game_hook)
     def on_get_once(self, req, resp):
-        resp.text = 'Responder called.'
+        resp.text = "Responder called."
 
     @falcon.after(_game_hook)
     @falcon.after(_game_hook)
     def on_get_twice(self, req, resp):
-        resp.text = 'Responder called.'
+        resp.text = "Responder called."
 
     @falcon.after(_game_hook)
     @falcon.after(_game_hook)
     @falcon.after(_game_hook)
     def on_get_thrice(self, req, resp):
-        resp.text = 'Responder called.'
+        resp.text = "Responder called."
 
 
 @pytest.fixture
@@ -413,23 +394,26 @@ def game_client():
     app = falcon.App()
     resource = HandGame()
 
-    app.add_route('/seed', resource)
-    app.add_route('/once', resource, suffix='once')
-    app.add_route('/twice', resource, suffix='twice')
-    app.add_route('/thrice', resource, suffix='thrice')
+    app.add_route("/seed", resource)
+    app.add_route("/once", resource, suffix="once")
+    app.add_route("/twice", resource, suffix="twice")
+    app.add_route("/thrice", resource, suffix="thrice")
 
     return testing.TestClient(app)
 
 
-@pytest.mark.parametrize('seed,uri,expected', [
-    ('paper', '/once', 'paper, rock, scissors'),
-    ('scissors', '/twice', 'scissors, paper, rock, scissors'),
-    ('rock', '/thrice', 'rock, scissors, paper, rock, scissors'),
-    ('paper', '/thrice', 'paper, rock, scissors, paper, rock'),
-])
+@pytest.mark.parametrize(
+    "seed,uri,expected",
+    [
+        ("paper", "/once", "paper, rock, scissors"),
+        ("scissors", "/twice", "scissors, paper, rock, scissors"),
+        ("rock", "/thrice", "rock, scissors, paper, rock, scissors"),
+        ("paper", "/thrice", "paper, rock, scissors, paper, rock"),
+    ],
+)
 def test_after_hooks_on_suffixed_resource(game_client, seed, uri, expected):
-    game_client.simulate_put('/seed', json=seed)
+    game_client.simulate_put("/seed", json=seed)
 
     resp = game_client.simulate_get(uri)
     assert resp.status_code == 200
-    assert resp.headers['X-Hook-Game'] == expected
+    assert resp.headers["X-Hook-Game"] == expected
